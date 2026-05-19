@@ -1,0 +1,75 @@
+---
+title: Search Ranking Pipeline
+year: "2023"
+type: Machine Learning
+status: Production
+summary: A learning-to-rank pipeline that replaced a hand-tuned BM25 baseline, shipping an offline evaluation framework that made iterating on ranking models safe and fast.
+tags: [Python, LightGBM, Elasticsearch, MLflow]
+---
+
+## Context
+
+The search ranking system I inherited was a weighted BM25 query with a dozen hand-tuned boost factors. It worked — in the sense that it returned plausible results. It was also fragile: changing one weight to fix a category of queries routinely broke another. There was no evaluation framework, so the team relied on spot-checking results pages and gut feel.
+
+The goal wasn't to build a sophisticated ML system. It was to make changes *safe* — to have numbers that told us whether a change was better or worse before it touched users.
+
+## Building the evaluation layer first
+
+The first month was entirely offline infrastructure. Nothing else was worth doing without it.
+
+I built a query-document dataset from six months of click logs, using a simplified judgment model: clicks get a relevance label proportional to their position (a click at rank 1 is stronger signal than a click at rank 5), with zero-click sessions generating negative labels for top-shown results.
+
+The resulting dataset had 2.1M query-document pairs across 340k unique queries. I split it chronologically, not randomly — using future queries to evaluate models trained on past queries is the only split that resembles production.
+
+The metric I chose was nDCG@10. It's imperfect — click signal is noisy, and high-position clicks are conflated with relevance — but it's stable, interpretable, and correlated with the A/B outcomes we could measure later.
+
+```python
+def ndcg_at_k(y_true: np.ndarray, y_score: np.ndarray, k: int = 10) -> float:
+    order = np.argsort(y_score)[::-1][:k]
+    gains = y_true[order]
+    discounts = np.log2(np.arange(2, k + 2))
+    dcg = (gains / discounts).sum()
+    ideal = np.sort(y_true)[::-1][:k]
+    idcg = (ideal / discounts).sum()
+    return dcg / idcg if idcg > 0 else 0.0
+```
+
+With this in place, I could evaluate the existing BM25 baseline: nDCG@10 of 0.41. Every subsequent experiment would be measured against that number.
+
+## The model
+
+I chose LightGBM with `lambdarank` objective — pairwise ranking loss with NDCG as the optimization target. The feature set started minimal:
+
+- BM25 components (title, body, category) as separate features, not pre-combined
+- Query-document length ratios
+- Recency signals (days since last update)
+- Popularity: 30-day click count, normalized by query frequency
+
+The rationale for keeping BM25 components separate: the model learns their relative weights better than any human can hand-tune. The original system's boosts were guesses; let the gradient descent figure it out.
+
+Training took 8 minutes on a 16-core machine. Feature importance aligned with intuition — title BM25 dominated, which matched what the manual boosts had been doing all along.
+
+## Offline → online
+
+Getting from a trained model to serving required integrating with Elasticsearch. ES doesn't natively run LightGBM models, so I used a two-phase approach:
+
+1. **Candidate retrieval**: ES returns the top-200 candidates using BM25 (cheap, recall-focused)
+2. **Reranking**: a sidecar service fetches the candidates, computes features, runs the model, and returns the top-10 in model-ranked order
+
+The sidecar is a lightweight FastAPI service that loads the model at startup and processes requests in batches. Feature computation is the bottleneck — ES calls for view counts and recency add 15–20ms. I pre-indexed these signals into the document at index time, reducing that to a lookup.
+
+Latency at P99 went from 85ms (ES-only) to 112ms (with reranking). The team considered this acceptable for the quality improvement.
+
+## Results
+
+The model shipped nDCG@10 of 0.54 offline — a 32% improvement over baseline. In the subsequent A/B test, we measured a 9% increase in click-through rate and a 6% decrease in zero-result reformulations (where a user searches again immediately after getting results).
+
+The bigger win was operational. With the evaluation framework in place, the team ran 14 experiments over the following quarter — adjusting feature sets, updating training data, testing query expansion — and could assess each in a day rather than debating gut feelings over a week.
+
+## What I learned
+
+**Offline metrics lie about some things but are reliable about direction.** Every model that improved nDCG@10 by more than 1 point also improved in A/B. Several changes that looked neutral offline turned out neutral online too. The correlation isn't perfect, but it's good enough to filter experiments.
+
+**Feature engineering > model architecture.** I spent the first two weeks trying different ranking objectives and model types. The biggest gains came from adding recency signals and separating BM25 components — the model stayed the same. This isn't surprising in retrospect; the data has more signal than any specific model architecture difference.
+
+**Serving latency is a product of how you compute features, not which model you pick.** The LightGBM inference itself takes 2ms. The rest of the latency budget goes to feature lookups. Caching and pre-indexing matter more than optimizing the model inference path.
