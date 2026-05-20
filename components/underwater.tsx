@@ -6,17 +6,38 @@ import { useEffect, useRef } from 'react'
 
 const lerp = (a: number, b: number, t: number) => Math.round(a + (b - a) * t)
 
+
 const PALETTE: Record<string, { s: [number, number, number]; e: [number, number, number] }> = {
-  'color-bg':      { s: [246, 244, 240], e: [7,   16,  36]  },
-  'color-ink':     { s: [28,  25,  23],  e: [208, 228, 250] },
-  'color-muted':   { s: [155, 145, 137], e: [80,  120, 165] },
-  'color-border':  { s: [224, 219, 212], e: [16,  40,  75]  },
-  'color-surface': { s: [237, 234, 228], e: [10,  24,  48]  },
+  'color-bg': { s: [188, 218, 235], e: [7, 16, 36] },
+  'color-ink': { s: [32, 44, 58], e: [208, 228, 250] },
+  'color-muted': { s: [116, 136, 154], e: [80, 120, 165] },
+  'color-border': { s: [214, 226, 235], e: [16, 40, 75] },
+  'color-surface': { s: [226, 235, 242], e: [10, 24, 48] },
 }
 
 function applyDepth(t: number) {
   const root = document.documentElement
   for (const [k, { s, e }] of Object.entries(PALETTE)) {
+    if (k === 'color-ink') {
+      const bg_color_s = [PALETTE['color-bg'].s[0], PALETTE['color-bg'].s[1], PALETTE['color-bg'].s[2]]
+      const bg_color_e = [PALETTE['color-bg'].e[0], PALETTE['color-bg'].e[1], PALETTE['color-bg'].e[2]]
+      const avg_color = bg_color_s.reduce((acc, val, i) => acc + lerp(val, bg_color_e[i], t), 0) / 3
+      const ink_delta = 20
+      console.log(avg_color)
+      const temp = t < 0.2 ? t : t < 0.6 ? 0.2 : t < 0.8 ? 0.2 + (t - 0.6) * 1.5 : 1
+      if (avg_color > 128) {
+        root.style.setProperty(
+          `--${k}`,
+          `rgb(${lerp(s[0], s[0] + ink_delta, temp)},${lerp(s[1], s[1] + ink_delta, temp)},${lerp(s[2], s[2] + ink_delta, temp)})`
+        )
+      } else {
+        root.style.setProperty(
+          `--${k}`,
+          `rgb(${lerp(e[0], e[0] - ink_delta, temp)},${lerp(e[1], e[1] - ink_delta, temp)},${lerp(e[2], e[2] + ink_delta, temp)})`
+        )
+      }
+      continue
+    }
     root.style.setProperty(
       `--${k}`,
       `rgb(${lerp(s[0], e[0], t)},${lerp(s[1], e[1], t)},${lerp(s[2], e[2], t)})`
@@ -38,39 +59,39 @@ const FISH_SVG = [
 
 function spawnFish(container: HTMLElement) {
   const goRight = Math.random() > 0.3
-  const y        = 60 + Math.random() * (window.innerHeight - 120)
-  const speed    = 0.9 + Math.random() * 1.8
-  const scale    = 0.65 + Math.random() * 0.7
+  const y = 60 + Math.random() * (window.innerHeight - 120)
+  const speed = 0.9 + Math.random() * 1.8
+  const scale = 0.65 + Math.random() * 0.7
 
   const maxScroll = document.body.scrollHeight - window.innerHeight
-  const depth     = maxScroll > 0 ? Math.min(window.scrollY / maxScroll, 1) : 0
-  const opacity   = Math.min(0.07 + depth * 0.22 + Math.random() * 0.06, 0.35)
+  const depth = maxScroll > 0 ? Math.min(window.scrollY / maxScroll, 1) : 0
+  const opacity = Math.min(0.07 + depth * 0.22 + Math.random() * 0.06, 0.35)
 
   const el = document.createElement('div')
   el.innerHTML = FISH_SVG
   Object.assign(el.style, {
-    position:        'fixed',
-    pointerEvents:   'none',
-    zIndex:          '0',
-    color:           'rgb(70,130,200)',
-    opacity:         String(opacity),
-    top:             y + 'px',
-    left:            (goRight ? -80 : window.innerWidth + 80) + 'px',
-    transform:       `scaleX(${goRight ? 1 : -1}) scale(${scale})`,
+    position: 'fixed',
+    pointerEvents: 'none',
+    zIndex: '0',
+    color: 'rgb(70,130,200)',
+    opacity: String(opacity),
+    top: y + 'px',
+    left: (goRight ? -80 : window.innerWidth + 80) + 'px',
+    transform: `scaleX(${goRight ? 1 : -1}) scale(${scale})`,
     transformOrigin: 'center center',
-    willChange:      'left, top',
+    willChange: 'left, top',
   })
   container.appendChild(el)
 
-  let x      = goRight ? -80 : window.innerWidth + 80
-  let tick   = 0
+  let x = goRight ? -80 : window.innerWidth + 80
+  let tick = 0
   const originY = y
 
   const frame = () => {
     tick++
     x += speed * (goRight ? 1 : -1)
     el.style.left = x + 'px'
-    el.style.top  = (originY + Math.sin(tick * 0.04) * 5) + 'px'
+    el.style.top = (originY + Math.sin(tick * 0.04) * 5) + 'px'
 
     const done = goRight ? x > window.innerWidth + 80 : x < -80
     if (!done) requestAnimationFrame(frame)
@@ -94,7 +115,7 @@ export function Underwater() {
     // Apply depth immediately for non-zero scroll position on mount
     applyDepth(computeT())
 
-    let raf  = 0
+    let raf = 0
     let prev = -1
     const onScroll = () => {
       const t = computeT()
@@ -111,13 +132,9 @@ export function Underwater() {
       timer = setTimeout(() => {
         if (containerRef.current) spawnFish(containerRef.current)
         schedule()
-      }, 9000 + Math.random() * 15000)
+      }, 1000 + Math.random() * 5000)
     }
-    // First fish after a short delay
-    timer = setTimeout(() => {
-      if (containerRef.current) spawnFish(containerRef.current)
-      schedule()
-    }, 3000 + Math.random() * 5000)
+    schedule()
 
     return () => {
       window.removeEventListener('scroll', onScroll)
