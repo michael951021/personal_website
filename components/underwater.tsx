@@ -6,9 +6,8 @@ import { useEffect, useRef } from 'react'
 
 const lerp = (a: number, b: number, t: number) => Math.round(a + (b - a) * t)
 
-
 const PALETTE: Record<string, { s: [number, number, number]; e: [number, number, number] }> = {
-  'color-bg': { s: [188, 218, 235], e: [7, 16, 36] },
+  'color-bg': { s: [199, 222, 240], e: [7, 16, 36] },
   'color-ink': { s: [32, 44, 58], e: [208, 228, 250] },
   'color-muted': { s: [116, 136, 154], e: [80, 120, 165] },
   'color-border': { s: [214, 226, 235], e: [16, 40, 75] },
@@ -23,7 +22,6 @@ function applyDepth(t: number) {
       const bg_color_e = [PALETTE['color-bg'].e[0], PALETTE['color-bg'].e[1], PALETTE['color-bg'].e[2]]
       const avg_color = bg_color_s.reduce((acc, val, i) => acc + lerp(val, bg_color_e[i], t), 0) / 3
       const ink_delta = 20
-      console.log(avg_color)
       const temp = t < 0.2 ? t : t < 0.6 ? 0.2 : t < 0.8 ? 0.2 + (t - 0.6) * 1.5 : 1
       if (avg_color > 128) {
         root.style.setProperty(
@@ -70,7 +68,6 @@ function ensureStyles() {
 
 // ─── fish SVGs ────────────────────────────────────────────────
 
-// Simple silhouette: oval body + forked tail + dorsal hint + eye
 const FISH_SVG = [
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 28" width="70" height="28" aria-hidden="true">',
   '<ellipse cx="42" cy="14" rx="25" ry="9" fill="currentColor"/>',
@@ -80,7 +77,6 @@ const FISH_SVG = [
   '</svg>',
 ].join('')
 
-// Anglerfish: fat body, protruding jaw with teeth, dorsal lure with bioluminescent glow
 const ANGLER_SVG = [
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 65" width="100" height="65" style="overflow:visible" aria-hidden="true">',
   '<polygon points="18,40 3,26 3,54" fill="currentColor"/>',
@@ -96,9 +92,13 @@ const ANGLER_SVG = [
   '</svg>',
 ].join('')
 
-function spawnOrbs(container: HTMLElement) {
+// ─── orbs ─────────────────────────────────────────────────────
+
+interface OrbRef { el: HTMLElement; rate: number }
+
+function spawnOrbs(container: HTMLElement): OrbRef[] {
+  const refs: OrbRef[] = []
   for (let i = 0; i < 40; i++) {
-    const orb = document.createElement('div')
     const size = 1.5 + Math.random() * 8
     const blur = 0.4 + Math.random() * 2.5
     const opacity = 0.12 + Math.random() * 0.45
@@ -107,38 +107,59 @@ function spawnOrbs(container: HTMLElement) {
     const drift = (Math.random() - 0.5) * 80
     const startX = Math.random() * 100
     const startY = 15 + Math.random() * 100
+    // Larger orbs are closer → stronger parallax shift on scroll
+    const rate = 0.08 + (size / 9.5) * 0.85
 
-    orb.style.cssText = [
-      'position:fixed',
+    // Outer wrapper: position:fixed anchor; receives scroll-driven translateY
+    const outer = document.createElement('div')
+    outer.style.cssText = `position:fixed;left:${startX}%;top:${startY}vh;pointer-events:none;will-change:transform;`
+
+    // Inner: the actual particle with the looping float animation
+    const inner = document.createElement('div')
+    inner.style.cssText = [
       `width:${size}px`,
       `height:${size}px`,
       'border-radius:50%',
-      `left:${startX}%`,
-      `top:${startY}vh`,
       'background:rgba(210,240,255,1)',
       `filter:blur(${blur}px)`,
       'pointer-events:none',
       'will-change:transform,opacity',
       `animation:orbFloat ${duration}s linear ${delay}s infinite`,
     ].join(';')
-    orb.style.setProperty('--op', String(opacity))
-    orb.style.setProperty('--drift', drift + 'px')
+    inner.style.setProperty('--op', String(opacity))
+    inner.style.setProperty('--drift', drift + 'px')
 
-    container.appendChild(orb)
+    outer.appendChild(inner)
+    container.appendChild(outer)
+    refs.push({ el: outer, rate })
   }
+  return refs
 }
+
+// ─── fish ─────────────────────────────────────────────────────
 
 function spawnFish(container: HTMLElement, t: number) {
   const isAngler = t > 0.65
   const goRight = Math.random() > 0.3
   const offscreen = isAngler ? 120 : 90
 
+  // depth: 0 = far (slow parallax, small), 1 = near (fast parallax, large)
+  const depth = isAngler
+    ? 0.1 + Math.random() * 0.5   // anglerfish lurk at mid-distance
+    : 0.15 + Math.random() * 0.85 // regular fish span the full depth range
+
+  // How much of the scroll the fish inherits as upward drift
+  const parallaxRate = 0.08 + depth * 0.72  // 0.19 (far) → 0.80 (near)
+
   const y = 60 + Math.random() * (window.innerHeight - 120)
   const speed = isAngler ? 0.4 + Math.random() * 0.7 : 0.9 + Math.random() * 1.8
-  const scale = isAngler ? 0.8 + Math.random() * 0.5 : 0.65 + Math.random() * 0.7
 
-  // Anglerfish are more opaque — they carry their own light in the dark
-  const opacity = isAngler
+  // Scale tied to depth: close fish loom large, distant fish are tiny silhouettes
+  const scale = isAngler
+    ? 0.5 + depth * 0.7    // 0.57–0.85 (ANGLER_SVG is 100×65, inherently large)
+    : 0.2 + depth * 1.05   // 0.36–1.09 (FISH_SVG is 70×28)
+
+  const baseOpacity = isAngler
     ? 0.38 + Math.random() * 0.18
     : Math.min(0.07 + t * 0.22 + Math.random() * 0.06, 0.35)
 
@@ -149,7 +170,7 @@ function spawnFish(container: HTMLElement, t: number) {
     pointerEvents: 'none',
     zIndex: '0',
     color: isAngler ? 'rgb(28, 68, 128)' : 'rgb(70,130,200)',
-    opacity: String(opacity),
+    opacity: String(baseOpacity),
     top: y + 'px',
     left: (goRight ? -offscreen : window.innerWidth + offscreen) + 'px',
     transform: `scaleX(${goRight ? 1 : -1}) scale(${scale})`,
@@ -161,12 +182,26 @@ function spawnFish(container: HTMLElement, t: number) {
   let x = goRight ? -offscreen : window.innerWidth + offscreen
   let tick = 0
   const originY = y
+  const spawnScrollY = window.scrollY
 
   const frame = () => {
     tick++
     x += speed * (goRight ? 1 : -1)
+
+    // Camera-moves-down illusion: closer fish drift up faster as you scroll
+    const scrollOffset = (window.scrollY - spawnScrollY) * parallaxRate
     el.style.left = x + 'px'
-    el.style.top = (originY + Math.sin(tick * (isAngler ? 0.02 : 0.04)) * (isAngler ? 3 : 5)) + 'px'
+    el.style.top = (originY + Math.sin(tick * (isAngler ? 0.02 : 0.04)) * (isAngler ? 3 : 5) - scrollOffset) + 'px'
+
+    // Anglerfish fade out in bright water (bg avg > 128 = shallow)
+    if (isAngler) {
+      const max = document.body.scrollHeight - window.innerHeight
+      const currentT = max > 0 ? Math.min(window.scrollY / max, 1) : 0
+      const { s: bgS, e: bgE } = PALETTE['color-bg']
+      const avgBg = (lerp(bgS[0], bgE[0], currentT) + lerp(bgS[1], bgE[1], currentT) + lerp(bgS[2], bgE[2], currentT)) / 3
+      const fadeMult = avgBg > 45 ? Math.max(0, 1 - (avgBg - 45) / 40) : 1
+      el.style.opacity = String(baseOpacity * fadeMult)
+    }
 
     const done = goRight ? x > window.innerWidth + offscreen : x < -offscreen
     if (!done) requestAnimationFrame(frame)
@@ -183,7 +218,12 @@ export function Underwater() {
 
   useEffect(() => {
     ensureStyles()
-    if (containerRef.current) spawnOrbs(containerRef.current)
+
+    let orbRefs: OrbRef[] = []
+    if (containerRef.current) orbRefs = spawnOrbs(containerRef.current)
+
+    // Capture scroll position at mount so parallax starts from zero offset
+    const initScrollY = window.scrollY
 
     const computeT = () => {
       const max = document.body.scrollHeight - window.innerHeight
@@ -192,32 +232,44 @@ export function Underwater() {
 
     const rays = document.getElementById('water-rays')
 
+    const updateOrbs = () => {
+      const offset = window.scrollY - initScrollY
+      for (const { el, rate } of orbRefs) {
+        el.style.transform = `translateY(${-offset * rate}px)`
+      }
+    }
+
     const applyAll = (t: number) => {
       applyDepth(t)
       if (rays) rays.style.opacity = String(Math.max(0, 0.22 - t * 0.2))
     }
 
-    // Apply depth immediately for non-zero scroll position on mount
     applyAll(computeT())
+    updateOrbs()
 
     let raf = 0
     let prev = -1
     const onScroll = () => {
-      const t = computeT()
-      if (Math.abs(t - prev) < 0.003) return
-      prev = t
       cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => applyAll(t))
+      raf = requestAnimationFrame(() => {
+        const t = computeT()
+        // Colour interpolation only needs to fire on meaningful depth change
+        if (Math.abs(t - prev) >= 0.003) {
+          applyAll(t)
+          prev = t
+        }
+        // Orb parallax must track every scroll pixel for a smooth camera feel
+        updateOrbs()
+      })
     }
     window.addEventListener('scroll', onScroll, { passive: true })
 
-    // Staggered fish spawning
     let timer: ReturnType<typeof setTimeout>
     const schedule = () => {
       timer = setTimeout(() => {
         if (containerRef.current) spawnFish(containerRef.current, computeT())
         schedule()
-      }, 1000 + Math.random() * 8000)
+      }, 1000 + Math.random() * 5000)
     }
     schedule()
 
