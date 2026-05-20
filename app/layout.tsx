@@ -45,12 +45,13 @@ export default function RootLayout({
       className={`${newsreader.variable} ${jetbrainsMono.variable}`}
     >
       <body>
-        {/* Fixed fish + depth layer, painted below content */}
+        {/* Fixed background layers: fish + rays, painted below content */}
         <Underwater />
+        <div id="water-rays" />
 
         {/* Content — position:relative + z-index:1 creates a stacking context
-            above the fish layer; background:transparent lets fish show through
-            in margins and between elements */}
+            above the background layers; background:transparent lets them show
+            through in margins and between elements */}
         <div
           className="min-h-dvh flex flex-col"
           style={{

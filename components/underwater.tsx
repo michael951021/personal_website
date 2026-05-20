@@ -45,7 +45,23 @@ function applyDepth(t: number) {
   }
 }
 
-// ─── fish ─────────────────────────────────────────────────────
+// ─── styles ───────────────────────────────────────────────────
+
+function ensureStyles() {
+  if (document.getElementById('underwater-styles')) return
+  const s = document.createElement('style')
+  s.id = 'underwater-styles'
+  s.textContent = `
+    @keyframes lurePulse {
+      0%, 100% { opacity: 0.22; }
+      50% { opacity: 0.06; }
+    }
+    .lure-pulse { animation: lurePulse 2.2s ease-in-out infinite; }
+  `
+  document.head.appendChild(s)
+}
+
+// ─── fish SVGs ────────────────────────────────────────────────
 
 // Simple silhouette: oval body + forked tail + dorsal hint + eye
 const FISH_SVG = [
@@ -57,43 +73,63 @@ const FISH_SVG = [
   '</svg>',
 ].join('')
 
-function spawnFish(container: HTMLElement) {
-  const goRight = Math.random() > 0.3
-  const y = 60 + Math.random() * (window.innerHeight - 120)
-  const speed = 0.9 + Math.random() * 1.8
-  const scale = 0.65 + Math.random() * 0.7
+// Anglerfish: fat body, protruding jaw with teeth, dorsal lure with bioluminescent glow
+const ANGLER_SVG = [
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 65" width="100" height="65" style="overflow:visible" aria-hidden="true">',
+  '<polygon points="18,40 3,26 3,54" fill="currentColor"/>',
+  '<ellipse cx="50" cy="40" rx="33" ry="20" fill="currentColor"/>',
+  '<ellipse cx="78" cy="48" rx="10" ry="7" fill="currentColor"/>',
+  '<polygon points="70,46 73,55 67,55" fill="rgba(255,255,255,0.42)"/>',
+  '<polygon points="76,47 79,56 73,56" fill="rgba(255,255,255,0.42)"/>',
+  '<circle cx="73" cy="33" r="3" fill="rgba(255,255,255,0.65)"/>',
+  '<path d="M67,20 Q79,5 87,1" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>',
+  '<circle cx="87" cy="1" r="9" fill="#55ccff" class="lure-pulse"/>',
+  '<circle cx="87" cy="1" r="4.5" fill="#99eeff" opacity="0.78"/>',
+  '<circle cx="87" cy="1" r="2" fill="white" opacity="0.96"/>',
+  '</svg>',
+].join('')
 
-  const maxScroll = document.body.scrollHeight - window.innerHeight
-  const depth = maxScroll > 0 ? Math.min(window.scrollY / maxScroll, 1) : 0
-  const opacity = Math.min(0.07 + depth * 0.22 + Math.random() * 0.06, 0.35)
+function spawnFish(container: HTMLElement, t: number) {
+  const isAngler  = t > 0.65
+  const goRight   = Math.random() > 0.3
+  const offscreen = isAngler ? 120 : 90
+
+  const y     = 60 + Math.random() * (window.innerHeight - 120)
+  const speed = isAngler ? 0.4 + Math.random() * 0.7 : 0.9 + Math.random() * 1.8
+  const scale = isAngler ? 0.8 + Math.random() * 0.5  : 0.65 + Math.random() * 0.7
+
+  // Anglerfish are more opaque — they carry their own light in the dark
+  const opacity = isAngler
+    ? 0.38 + Math.random() * 0.18
+    : Math.min(0.07 + t * 0.22 + Math.random() * 0.06, 0.35)
 
   const el = document.createElement('div')
-  el.innerHTML = FISH_SVG
+  el.innerHTML = isAngler ? ANGLER_SVG : FISH_SVG
   Object.assign(el.style, {
-    position: 'fixed',
-    pointerEvents: 'none',
-    zIndex: '0',
-    color: 'rgb(70,130,200)',
-    opacity: String(opacity),
-    top: y + 'px',
-    left: (goRight ? -80 : window.innerWidth + 80) + 'px',
-    transform: `scaleX(${goRight ? 1 : -1}) scale(${scale})`,
+    position:        'fixed',
+    pointerEvents:   'none',
+    zIndex:          '0',
+    color:           isAngler ? 'rgb(28, 68, 128)' : 'rgb(70,130,200)',
+    opacity:         String(opacity),
+    top:             y + 'px',
+    left:            (goRight ? -offscreen : window.innerWidth + offscreen) + 'px',
+    transform:       `scaleX(${goRight ? 1 : -1}) scale(${scale})`,
     transformOrigin: 'center center',
-    willChange: 'left, top',
+    willChange:      'left, top',
   })
   container.appendChild(el)
 
-  let x = goRight ? -80 : window.innerWidth + 80
-  let tick = 0
+  let x      = goRight ? -offscreen : window.innerWidth + offscreen
+  let tick   = 0
   const originY = y
 
   const frame = () => {
     tick++
     x += speed * (goRight ? 1 : -1)
     el.style.left = x + 'px'
-    el.style.top = (originY + Math.sin(tick * 0.04) * 5) + 'px'
+    el.style.top  = (originY + Math.sin(tick * (isAngler ? 0.02 : 0.04)) * (isAngler ? 3 : 5)) + 'px'
 
-    const done = goRight ? x > window.innerWidth + 80 : x < -80
+    const done = goRight ? x > window.innerWidth + offscreen : x < -offscreen
     if (!done) requestAnimationFrame(frame)
     else el.remove()
   }
@@ -107,13 +143,22 @@ export function Underwater() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    ensureStyles()
+
     const computeT = () => {
       const max = document.body.scrollHeight - window.innerHeight
       return max > 0 ? Math.min(window.scrollY / max, 1) : 0
     }
 
+    const rays = document.getElementById('water-rays')
+
+    const applyAll = (t: number) => {
+      applyDepth(t)
+      if (rays) rays.style.opacity = String(Math.max(0, 0.22 - t * 0.2))
+    }
+
     // Apply depth immediately for non-zero scroll position on mount
-    applyDepth(computeT())
+    applyAll(computeT())
 
     let raf = 0
     let prev = -1
@@ -122,7 +167,7 @@ export function Underwater() {
       if (Math.abs(t - prev) < 0.003) return
       prev = t
       cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => applyDepth(t))
+      raf = requestAnimationFrame(() => applyAll(t))
     }
     window.addEventListener('scroll', onScroll, { passive: true })
 
@@ -130,7 +175,7 @@ export function Underwater() {
     let timer: ReturnType<typeof setTimeout>
     const schedule = () => {
       timer = setTimeout(() => {
-        if (containerRef.current) spawnFish(containerRef.current)
+        if (containerRef.current) spawnFish(containerRef.current, computeT())
         schedule()
       }, 1000 + Math.random() * 5000)
     }

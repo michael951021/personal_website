@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getAllProjects } from '@/lib/projects'
 import { site } from '@/lib/config'
+import { ProjectList } from '@/components/project-list'
 
 export default function Home() {
   const projects = getAllProjects()
@@ -65,73 +66,7 @@ export default function Home() {
               Work
             </p>
 
-            <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {projects.map((project, i) => (
-                <li
-                  key={project.slug}
-                  style={{
-                    borderTop: '1px solid var(--color-border)',
-                    paddingTop: '1.1rem',
-                    paddingBottom: '1.1rem',
-                  }}
-                >
-                  <Link
-                    href={`/work/${project.slug}`}
-                    className="group flex items-start justify-between gap-8"
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
-                        <span
-                          style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: '11px',
-                            color: 'var(--color-muted)',
-                            letterSpacing: '0.04em',
-                            flexShrink: 0,
-                          }}
-                        >
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <span
-                          className="project-title"
-                          style={{
-                            fontSize: '17px',
-                            color: 'var(--color-ink)',
-                            transition: 'font-style 0ms',
-                          }}
-                        >
-                          {project.title}
-                        </span>
-                      </div>
-                      <p
-                        style={{
-                          fontSize: '14px',
-                          color: 'var(--color-muted)',
-                          marginTop: '0.2rem',
-                          paddingLeft: '1.75rem',
-                        }}
-                      >
-                        {project.summary}
-                      </p>
-                    </div>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '11px',
-                        color: 'var(--color-muted)',
-                        letterSpacing: '0.04em',
-                        flexShrink: 0,
-                        paddingTop: '0.15rem',
-                      }}
-                    >
-                      {project.year}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-              <li style={{ borderTop: '1px solid var(--color-border)' }} />
-            </ol>
+            <ProjectList projects={projects} />
           </section>
         )}
 
