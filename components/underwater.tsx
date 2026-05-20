@@ -57,6 +57,13 @@ function ensureStyles() {
       50% { opacity: 0.06; }
     }
     .lure-pulse { animation: lurePulse 2.2s ease-in-out infinite; }
+
+    @keyframes orbFloat {
+      0%   { transform: translateY(0px) translateX(0px); opacity: 0; }
+      10%  { opacity: var(--op, 0.3); }
+      90%  { opacity: var(--op, 0.3); }
+      100% { transform: translateY(-130vh) translateX(var(--drift, 0px)); opacity: 0; }
+    }
   `
   document.head.appendChild(s)
 }
@@ -89,14 +96,46 @@ const ANGLER_SVG = [
   '</svg>',
 ].join('')
 
+function spawnOrbs(container: HTMLElement) {
+  for (let i = 0; i < 40; i++) {
+    const orb = document.createElement('div')
+    const size = 1.5 + Math.random() * 8
+    const blur = 0.4 + Math.random() * 2.5
+    const opacity = 0.12 + Math.random() * 0.45
+    const duration = 20 + Math.random() * 25
+    const delay = -(Math.random() * duration)
+    const drift = (Math.random() - 0.5) * 80
+    const startX = Math.random() * 100
+    const startY = 15 + Math.random() * 100
+
+    orb.style.cssText = [
+      'position:fixed',
+      `width:${size}px`,
+      `height:${size}px`,
+      'border-radius:50%',
+      `left:${startX}%`,
+      `top:${startY}vh`,
+      'background:rgba(210,240,255,1)',
+      `filter:blur(${blur}px)`,
+      'pointer-events:none',
+      'will-change:transform,opacity',
+      `animation:orbFloat ${duration}s linear ${delay}s infinite`,
+    ].join(';')
+    orb.style.setProperty('--op', String(opacity))
+    orb.style.setProperty('--drift', drift + 'px')
+
+    container.appendChild(orb)
+  }
+}
+
 function spawnFish(container: HTMLElement, t: number) {
-  const isAngler  = t > 0.65
-  const goRight   = Math.random() > 0.3
+  const isAngler = t > 0.65
+  const goRight = Math.random() > 0.3
   const offscreen = isAngler ? 120 : 90
 
-  const y     = 60 + Math.random() * (window.innerHeight - 120)
+  const y = 60 + Math.random() * (window.innerHeight - 120)
   const speed = isAngler ? 0.4 + Math.random() * 0.7 : 0.9 + Math.random() * 1.8
-  const scale = isAngler ? 0.8 + Math.random() * 0.5  : 0.65 + Math.random() * 0.7
+  const scale = isAngler ? 0.8 + Math.random() * 0.5 : 0.65 + Math.random() * 0.7
 
   // Anglerfish are more opaque — they carry their own light in the dark
   const opacity = isAngler
@@ -106,28 +145,28 @@ function spawnFish(container: HTMLElement, t: number) {
   const el = document.createElement('div')
   el.innerHTML = isAngler ? ANGLER_SVG : FISH_SVG
   Object.assign(el.style, {
-    position:        'fixed',
-    pointerEvents:   'none',
-    zIndex:          '0',
-    color:           isAngler ? 'rgb(28, 68, 128)' : 'rgb(70,130,200)',
-    opacity:         String(opacity),
-    top:             y + 'px',
-    left:            (goRight ? -offscreen : window.innerWidth + offscreen) + 'px',
-    transform:       `scaleX(${goRight ? 1 : -1}) scale(${scale})`,
+    position: 'fixed',
+    pointerEvents: 'none',
+    zIndex: '0',
+    color: isAngler ? 'rgb(28, 68, 128)' : 'rgb(70,130,200)',
+    opacity: String(opacity),
+    top: y + 'px',
+    left: (goRight ? -offscreen : window.innerWidth + offscreen) + 'px',
+    transform: `scaleX(${goRight ? 1 : -1}) scale(${scale})`,
     transformOrigin: 'center center',
-    willChange:      'left, top',
+    willChange: 'left, top',
   })
   container.appendChild(el)
 
-  let x      = goRight ? -offscreen : window.innerWidth + offscreen
-  let tick   = 0
+  let x = goRight ? -offscreen : window.innerWidth + offscreen
+  let tick = 0
   const originY = y
 
   const frame = () => {
     tick++
     x += speed * (goRight ? 1 : -1)
     el.style.left = x + 'px'
-    el.style.top  = (originY + Math.sin(tick * (isAngler ? 0.02 : 0.04)) * (isAngler ? 3 : 5)) + 'px'
+    el.style.top = (originY + Math.sin(tick * (isAngler ? 0.02 : 0.04)) * (isAngler ? 3 : 5)) + 'px'
 
     const done = goRight ? x > window.innerWidth + offscreen : x < -offscreen
     if (!done) requestAnimationFrame(frame)
@@ -144,6 +183,7 @@ export function Underwater() {
 
   useEffect(() => {
     ensureStyles()
+    if (containerRef.current) spawnOrbs(containerRef.current)
 
     const computeT = () => {
       const max = document.body.scrollHeight - window.innerHeight
@@ -177,7 +217,7 @@ export function Underwater() {
       timer = setTimeout(() => {
         if (containerRef.current) spawnFish(containerRef.current, computeT())
         schedule()
-      }, 1000 + Math.random() * 5000)
+      }, 1000 + Math.random() * 8000)
     }
     schedule()
 
