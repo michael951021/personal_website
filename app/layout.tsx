@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Newsreader, JetBrains_Mono } from 'next/font/google'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
+import { Underwater } from '@/components/underwater'
 import { site } from '@/lib/config'
 import './globals.css'
 
@@ -44,12 +45,21 @@ export default function RootLayout({
       className={`${newsreader.variable} ${jetbrainsMono.variable}`}
     >
       <body>
+        {/* Fixed fish + depth layer, painted below content */}
+        <Underwater />
+
+        {/* Content — position:relative + z-index:1 creates a stacking context
+            above the fish layer; background:transparent lets fish show through
+            in margins and between elements */}
         <div
           className="min-h-dvh flex flex-col"
           style={{
             maxWidth: '960px',
             margin: '0 auto',
             padding: '0 clamp(1.25rem, 4vw, 3.5rem)',
+            position: 'relative',
+            zIndex: 1,
+            background: 'transparent',
           }}
         >
           <Nav />
