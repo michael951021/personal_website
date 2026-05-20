@@ -4,27 +4,43 @@ import Link from 'next/link'
 import type { Project } from '@/lib/projects'
 
 function spawnBubbles(li: HTMLElement) {
-  const count = 3 + Math.floor(Math.random() * 3)
+  const titleEl = li.querySelector('.project-title') as HTMLElement | null
+  if (!titleEl) return
+
+  const liRect = li.getBoundingClientRect()
+  const titleRect = titleEl.getBoundingClientRect()
+
+  // Title position within the li's coordinate space
+  const titleTopInLi = titleRect.top - liRect.top
+  const titleLeftInLi = titleRect.left - liRect.left
+
+  // How far to rise: from the title up to just above the viewport top
+  const riseDistance = titleRect.top + 40
+
+  const duration = 1.4 + Math.random() * 0.6
+  const count = 4 + Math.floor(Math.random() * 2)
+
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
       const b = document.createElement('span')
-      const x     = 5 + Math.random() * 88
-      const size  = 2.5 + Math.random() * 3.5
-      const rise  = 16 + Math.random() * 22
-      const drift = (Math.random() - 0.5) * 10
+      const xOffset = (Math.random() - 0.5) * titleRect.width * 0.9
+      const x = titleLeftInLi + titleRect.width / 2 + xOffset
+      const size = 3 + Math.random() * 3
+      const drift = (Math.random() - 0.5) * 24
 
       Object.assign(b.style, {
-        position:        'absolute',
-        left:            x + '%',
-        bottom:          '2px',
-        width:           size + 'px',
-        height:          size + 'px',
-        borderRadius:    '50%',
-        border:          '1px solid var(--color-muted)',
-        backgroundColor: 'rgba(150,200,255,0.04)',
-        opacity:         '0.5',
-        pointerEvents:   'none',
-        willChange:      'transform, opacity',
+        position: 'absolute',
+        left: x + 'px',
+        top: (titleTopInLi + titleRect.height / 2) + 'px',
+        width: size + 'px',
+        height: size + 'px',
+        borderRadius: '50%',
+        border: '1px solid var(--color-muted)',
+        backgroundColor: 'rgba(150,200,255,0.06)',
+        opacity: '0.65',
+        pointerEvents: 'none',
+        willChange: 'transform, opacity',
+        transform: 'translate(0, 0)',
       })
 
       li.appendChild(b)
@@ -32,14 +48,14 @@ function spawnBubbles(li: HTMLElement) {
       // Double rAF ensures the initial state is painted before transition begins
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          b.style.transition = 'transform 0.65s ease-out, opacity 0.65s ease-out'
-          b.style.transform  = `translate(${drift}px, -${rise}px)`
-          b.style.opacity    = '0'
+          b.style.transition = `transform ${duration}s ease-out, opacity ${duration * 0.9}s ease-in`
+          b.style.transform = `translate(${drift}px, -${riseDistance}px)`
+          b.style.opacity = '0'
         })
       })
 
-      setTimeout(() => b.remove(), 700)
-    }, i * 70 + Math.random() * 40)
+      setTimeout(() => b.remove(), (duration + 0.15) * 1000)
+    }, i * 30 + Math.random() * 50)
   }
 }
 
@@ -50,10 +66,10 @@ export function ProjectList({ projects }: { projects: Project[] }) {
         <li
           key={project.slug}
           style={{
-            borderTop:    '1px solid var(--color-border)',
-            paddingTop:   '1.1rem',
-            paddingBottom:'1.1rem',
-            position:     'relative',
+            borderTop: '1px solid var(--color-border)',
+            paddingTop: '1.1rem',
+            paddingBottom: '1.1rem',
+            position: 'relative',
           }}
           onMouseEnter={e => spawnBubbles(e.currentTarget)}
         >
@@ -67,8 +83,8 @@ export function ProjectList({ projects }: { projects: Project[] }) {
                 <span
                   style={{
                     fontFamily: 'var(--font-mono)',
-                    fontSize:   '11px',
-                    color:      'var(--color-muted)',
+                    fontSize: '11px',
+                    color: 'var(--color-muted)',
                     letterSpacing: '0.04em',
                     flexShrink: 0,
                   }}
@@ -76,11 +92,11 @@ export function ProjectList({ projects }: { projects: Project[] }) {
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span
-                  className="project-title"
+                  className="project-title group-hover:translate-x-1.5 transition-transform duration-150"
                   style={{
-                    fontSize:   '17px',
-                    color:      'var(--color-ink)',
-                    transition: 'font-style 0ms',
+                    fontSize: '17px',
+                    color: 'var(--color-ink)',
+                    display: 'inline-block',
                   }}
                 >
                   {project.title}
@@ -88,10 +104,10 @@ export function ProjectList({ projects }: { projects: Project[] }) {
               </div>
               <p
                 style={{
-                  fontSize:   '14px',
-                  color:      'var(--color-muted)',
-                  marginTop:  '0.2rem',
-                  paddingLeft:'1.75rem',
+                  fontSize: '14px',
+                  color: 'var(--color-muted)',
+                  marginTop: '0.2rem',
+                  paddingLeft: '1.75rem',
                 }}
               >
                 {project.summary}
@@ -99,12 +115,12 @@ export function ProjectList({ projects }: { projects: Project[] }) {
             </div>
             <span
               style={{
-                fontFamily:    'var(--font-mono)',
-                fontSize:      '11px',
-                color:         'var(--color-muted)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                color: 'var(--color-muted)',
                 letterSpacing: '0.04em',
-                flexShrink:    0,
-                paddingTop:    '0.15rem',
+                flexShrink: 0,
+                paddingTop: '0.15rem',
               }}
             >
               {project.year}
