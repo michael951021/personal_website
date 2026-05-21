@@ -23,7 +23,7 @@ export function Nav() {
           className="transition-opacity duration-150 hover:opacity-55"
           style={{ fontFamily: 'var(--font-serif)', fontSize: '15px', color: 'var(--color-ink)' }}
         >
-          {site.name}
+          {"Home"}
         </Link>
 
         <div className="flex gap-8">

@@ -177,6 +177,19 @@
   opacity: 0.55;
 }
 
+/* ─── Portrait ───────────────────────────────────────────────── */
+
+@keyframes portrait-drift {
+  0%,  100% { transform: translateY(0px)  rotate(-0.7deg); }
+  50%        { transform: translateY(-6px) rotate(0.7deg);  }
+}
+
+.portrait-drift {
+  animation: portrait-drift 8s ease-in-out infinite;
+  will-change: transform;
+  display: block;
+}
+
 /* ─── Underwater effects ─────────────────────────────────────── */
 
 #water-rays {

@@ -18,7 +18,7 @@ function spawnBubbles(li: HTMLElement) {
   const riseDistance = titleRect.top + 40
 
   const duration = 1.4 + Math.random() * 0.6
-  const count = 4 + Math.floor(Math.random() * 2)
+  const count = 6 + Math.floor(Math.random() * 3)
 
   for (let i = 0; i < count; i++) {
     setTimeout(() => {

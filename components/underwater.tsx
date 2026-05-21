@@ -139,7 +139,8 @@ function spawnOrbs(container: HTMLElement): OrbRef[] {
 // ─── fish ─────────────────────────────────────────────────────
 
 function spawnFish(container: HTMLElement, t: number) {
-  const isAngler = t > 0.65
+  // Anglerfish only appear in deep water; normal fish appear at all depths
+  const isAngler = t > 0.65 && Math.random() < 0.35
   const goRight = Math.random() > 0.3
   const offscreen = isAngler ? 120 : 90
 
@@ -222,9 +223,6 @@ export function Underwater() {
     let orbRefs: OrbRef[] = []
     if (containerRef.current) orbRefs = spawnOrbs(containerRef.current)
 
-    // Capture scroll position at mount so parallax starts from zero offset
-    const initScrollY = window.scrollY
-
     const computeT = () => {
       const max = document.body.scrollHeight - window.innerHeight
       return max > 0 ? Math.min(window.scrollY / max, 1) : 0
@@ -233,9 +231,11 @@ export function Underwater() {
     const rays = document.getElementById('water-rays')
 
     const updateOrbs = () => {
-      const offset = window.scrollY - initScrollY
+      // Use scroll fraction × bounded max so orbs stay visible on long pages.
+      // Raw pixel accumulation pushed all orbs off-screen on /work/* pages.
+      const t = computeT()
       for (const { el, rate } of orbRefs) {
-        el.style.transform = `translateY(${-offset * rate}px)`
+        el.style.transform = `translateY(${-t * window.innerHeight * 0.45 * rate}px)`
       }
     }
 
@@ -269,7 +269,7 @@ export function Underwater() {
       timer = setTimeout(() => {
         if (containerRef.current) spawnFish(containerRef.current, computeT())
         schedule()
-      }, 1000 + Math.random() * 5000)
+      }, 1000 + Math.random() * 3000)
     }
     schedule()
 
