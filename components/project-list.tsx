@@ -66,7 +66,7 @@ export function ProjectList({ projects }: { projects: Project[] }) {
         <li
           key={project.slug}
           style={{
-            borderTop: '1px solid var(--color-border)',
+            borderTop: '1px solid var(--color-muted)',
             paddingTop: '1.1rem',
             paddingBottom: '1.1rem',
             position: 'relative',
@@ -112,6 +112,37 @@ export function ProjectList({ projects }: { projects: Project[] }) {
               >
                 {project.summary}
               </p>
+              {project.tags && project.tags.length > 0 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.3rem',
+                    marginTop: '0.55rem',
+                    paddingLeft: '1.75rem',
+                  }}
+                >
+                  {project.tags.map(tag => (
+                    <span
+                      key={tag}
+                      className="tag-pill"
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        letterSpacing: '0.06em',
+                        color: 'var(--color-muted)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: '2px',
+                        padding: '0.12em 0.5em',
+                        lineHeight: 1.7,
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
             <span
               style={{
@@ -128,7 +159,7 @@ export function ProjectList({ projects }: { projects: Project[] }) {
           </Link>
         </li>
       ))}
-      <li style={{ borderTop: '1px solid var(--color-border)' }} />
+      <li style={{ borderTop: '1px solid var(--color-muted)' }} />
     </ol>
   )
 }

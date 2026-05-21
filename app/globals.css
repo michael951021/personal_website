@@ -1,6 +1,37 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ─── Custom-property type registration ──────────────────────
+   Registering each color token as <color> lets the browser
+   interpolate them during CSS transitions (plain custom props
+   are "unknown" and cannot be transitioned without this).      */
+
+@property --color-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #F6F4F0;
+}
+@property --color-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1C1917;
+}
+@property --color-muted {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #9B9189;
+}
+@property --color-border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #E0DBD4;
+}
+@property --color-surface {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #EDEAE4;
+}
+
 /* ─── Design tokens ─────────────────────────────────────────── */
 
 @theme {
@@ -32,6 +63,20 @@
     line-height: 1.85;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Transition the custom-property values on the root element.
+       Because they're registered as <color> (above), the browser
+       can interpolate them — all descendants reading var(--color-*)
+       pick up the transitioning value automatically, so every
+       text/bg/border colour on the page cross-fades smoothly when
+       the JS depth-scroll crosses the light ↔ dark threshold.
+       250 ms is fast enough not to lag during continuous scrolling
+       but long enough to hide the hard ink-branch swap. */
+    transition:
+      --color-bg      250ms ease,
+      --color-ink     250ms ease,
+      --color-muted   250ms ease,
+      --color-border  250ms ease,
+      --color-surface 250ms ease;
   }
 
   body {
@@ -101,7 +146,7 @@
   font-size: 1.3em;
   margin-top: 2.5rem;
   margin-bottom: 0.75rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-muted);
   padding-bottom: 0.4rem;
 }
 
@@ -152,7 +197,7 @@
 }
 
 .prose hr {
-  border-color: var(--color-border);
+  border-color: var(--color-muted);
   margin: 2.5rem 0;
 }
 
@@ -175,6 +220,40 @@
 
 .link-fade:hover {
   opacity: 0.55;
+}
+
+/* ─── Tag pills ──────────────────────────────────────────────── */
+
+.tag-pill {
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  cursor: default;
+}
+
+.tag-pill:hover {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  border-color: var(--color-muted);
+}
+
+.check-out-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgb(85, 152, 215);
+  border: 1px solid rgba(85, 152, 215, 0.45);
+  border-radius: 2px;
+  padding: 0.45em 0.9em;
+  text-decoration: none;
+  background-color: rgba(85, 152, 215, 0.07);
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.check-out-link:hover {
+  background-color: rgba(85, 152, 215, 0.15);
+  border-color: rgba(85, 152, 215, 0.75);
 }
 
 /* ─── Portrait ───────────────────────────────────────────────── */

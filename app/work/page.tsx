@@ -37,7 +37,7 @@ export default function Work() {
           {projects.map((project, i) => (
             <li
               key={project.slug}
-              style={{ borderTop: '1px solid var(--color-border)' }}
+              style={{ borderTop: '1px solid var(--color-muted)' }}
             >
               <Link
                 href={`/work/${project.slug}`}
@@ -130,7 +130,7 @@ export default function Work() {
               </Link>
             </li>
           ))}
-          <li style={{ borderTop: '1px solid var(--color-border)' }} />
+          <li style={{ borderTop: '1px solid var(--color-muted)' }} />
         </ol>
 
       </div>

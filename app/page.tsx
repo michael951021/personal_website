@@ -9,7 +9,7 @@ export default function Home() {
 
   return (
     <div style={{ paddingTop: '16vh', paddingBottom: '6rem' }}>
-      <div style={{ maxWidth: '640px' }}>
+      <div style={{}}>
 
         {/* Intro */}
         <section style={{ marginBottom: '5rem' }}>
@@ -58,22 +58,61 @@ export default function Home() {
 
             {/* Floating portrait — drop portrait.jpg in /public/ */}
             <div style={{ flexShrink: 0, paddingTop: '0.25rem' }}>
-              <Image
-                src="/portrait.jpg"
-                alt={site.name}
-                width={140}
-                height={140}
+              {/*
+                portrait-drift wraps image + tail so they float as one unit.
+                paddingLeft reserves 42 px for the non-overlapping tail portion;
+                the tail itself is position:absolute z-index:0 so the portrait
+                (position:relative z-index:1) sits on top and hides the join.
+              */}
+              <div
                 className="portrait-drift"
-                style={{
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                  opacity: 0.82,
-                  filter:
-                    'saturate(0.45) sepia(0.12) hue-rotate(190deg) brightness(0.88)',
-                  boxShadow:
-                    '0 0 28px rgba(18,52,110,0.20), 0 0 56px rgba(18,52,110,0.10)',
-                }}
-              />
+                style={{ position: 'relative', display: 'inline-block', paddingLeft: '42px' }}
+              >
+                {/* Fish tail — left side, behind the portrait */}
+                <svg
+                  width="52"
+                  height="80"
+                  viewBox="0 0 52 80"
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '30px',   /* (140 - 80) / 2 — centres tail on portrait */
+                    zIndex: 0,
+                    fill: 'rgb(70, 130, 200)',   /* same blue as the swimming fish */
+                    opacity: 0.78,
+                  }}
+                >
+                  {/*
+                    Apex at right-centre (52,40) connecting to portrait's left edge.
+                    Two prongs curve left: top tip (0,8), bottom tip (0,72).
+                    Notch at (14,40) creates the classic forked-tail silhouette.
+                  */}
+                  <path d="M52,40 C40,28 18,8 0,8 C12,22 14,36 14,40 C14,44 12,58 0,72 C18,72 40,52 52,40Z" />
+                </svg>
+
+                <Image
+                  src="/portrait.jpg"
+                  alt={site.name}
+                  width={140}
+                  height={140}
+                  loading="eager"
+                  style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    width: '140px',
+                    height: '140px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    display: 'block',
+                    opacity: 0.82,
+                    filter:
+                      'saturate(0.45) sepia(0.12) hue-rotate(190deg) brightness(0.88)',
+                    boxShadow:
+                      '0 0 28px rgba(18,52,110,0.20), 0 0 56px rgba(18,52,110,0.10)',
+                  }}
+                />
+              </div>
             </div>
 
           </div>

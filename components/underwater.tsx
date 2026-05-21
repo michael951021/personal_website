@@ -9,33 +9,63 @@ const lerp = (a: number, b: number, t: number) => Math.round(a + (b - a) * t)
 const PALETTE: Record<string, { s: [number, number, number]; e: [number, number, number] }> = {
   'color-bg': { s: [199, 222, 240], e: [7, 16, 36] },
   'color-ink': { s: [32, 44, 58], e: [208, 228, 250] },
-  'color-muted': { s: [116, 136, 154], e: [80, 120, 165] },
+  'color-muted': { s: [116, 136, 154], e: [120, 180, 245] },
   'color-border': { s: [214, 226, 235], e: [16, 40, 75] },
   'color-surface': { s: [226, 235, 242], e: [10, 24, 48] },
 }
 
 function applyDepth(t: number) {
   const root = document.documentElement
+
+  // Shared helpers reused by ink / muted / border branches
+  const bgS = PALETTE['color-bg'].s
+  const bgE = PALETTE['color-bg'].e
+  const avgBg = (lerp(bgS[0], bgE[0], t) + lerp(bgS[1], bgE[1], t) + lerp(bgS[2], bgE[2], t)) / 3
+  // "Sticky" interpolation factor — plateaus in the mid-range so each mode's
+  // colours stay close to their endpoint values for maximum readability.
+  const temp = t < 0.2 ? t : t < 0.6 ? 0.2 : t < 0.8 ? 0.2 + (t - 0.6) * 1.5 : 1
+  const lightMode = avgBg > 128
+
   for (const [k, { s, e }] of Object.entries(PALETTE)) {
+
+    // ── ink: near-black on light bg / near-white on dark bg ─────────────
     if (k === 'color-ink') {
-      const bg_color_s = [PALETTE['color-bg'].s[0], PALETTE['color-bg'].s[1], PALETTE['color-bg'].s[2]]
-      const bg_color_e = [PALETTE['color-bg'].e[0], PALETTE['color-bg'].e[1], PALETTE['color-bg'].e[2]]
-      const avg_color = bg_color_s.reduce((acc, val, i) => acc + lerp(val, bg_color_e[i], t), 0) / 3
       const ink_delta = 20
-      const temp = t < 0.2 ? t : t < 0.6 ? 0.2 : t < 0.8 ? 0.2 + (t - 0.6) * 1.5 : 1
-      if (avg_color > 128) {
-        root.style.setProperty(
-          `--${k}`,
-          `rgb(${lerp(s[0], s[0] + ink_delta, temp)},${lerp(s[1], s[1] + ink_delta, temp)},${lerp(s[2], s[2] + ink_delta, temp)})`
-        )
+      if (lightMode) {
+        root.style.setProperty(`--${k}`,
+          `rgb(${lerp(s[0], s[0] + ink_delta, temp)},${lerp(s[1], s[1] + ink_delta, temp)},${lerp(s[2], s[2] + ink_delta, temp)})`)
       } else {
-        root.style.setProperty(
-          `--${k}`,
-          `rgb(${lerp(e[0], e[0] - ink_delta, temp)},${lerp(e[1], e[1] - ink_delta, temp)},${lerp(e[2], e[2] + ink_delta, temp)})`
-        )
+        root.style.setProperty(`--${k}`,
+          `rgb(${lerp(e[0], e[0] - ink_delta, temp)},${lerp(e[1], e[1] - ink_delta, temp)},${lerp(e[2], e[2] + ink_delta, temp)})`)
       }
       continue
     }
+
+    // ── muted: contrast-guaranteed, CSS-transitioned ────────────────────────
+    // Within each mode the value is driven directly from avgBg so it always
+    // has readable contrast against the current background:
+    //   light mode: lerp floor[32,44,56] → s  as avgBg rises 128→220
+    //   dark  mode: lerp e               → ceil[220,232,244] as avgBg rises 20→128
+    // The 250ms CSS @property transition (globals.css) cross-fades the jump
+    // at the avgBg=128 threshold so it fades instead of snapping.
+    if (k === 'color-muted') {
+      const floor: [number, number, number] = [32, 44, 56]    // dark — 3.4:1 at threshold bg
+      const ceil:  [number, number, number] = [220, 232, 244] // light — 3.3:1 at threshold bg
+      if (lightMode) {
+        // tScale 0 at avgBg=128 (threshold) → 1 at avgBg≈220 (page top)
+        const tScale = Math.max(0, Math.min(1, (avgBg - 128) / (220 - 128)))
+        root.style.setProperty(`--${k}`,
+          `rgb(${lerp(floor[0], s[0], tScale)},${lerp(floor[1], s[1], tScale)},${lerp(floor[2], s[2], tScale)})`)
+      } else {
+        // tScale 1 at avgBg=128 (threshold) → 0 at avgBg≈20 (page bottom)
+        const tScale = Math.max(0, Math.min(1, (avgBg - 20) / (128 - 20)))
+        root.style.setProperty(`--${k}`,
+          `rgb(${lerp(e[0], ceil[0], tScale)},${lerp(e[1], ceil[1], tScale)},${lerp(e[2], ceil[2], tScale)})`)
+      }
+      continue
+    }
+
+    // ── everything else (bg, border, surface): simple linear interpolation
     root.style.setProperty(
       `--${k}`,
       `rgb(${lerp(s[0], e[0], t)},${lerp(s[1], e[1], t)},${lerp(s[2], e[2], t)})`

@@ -50,7 +50,7 @@ const mdxComponents = {
         marginTop: '2.5rem',
         marginBottom: '0.75rem',
         paddingBottom: '0.4rem',
-        borderBottom: '1px solid var(--color-border)',
+        borderBottom: '1px solid var(--color-muted)',
         color: 'var(--color-ink)',
       }}
     />
@@ -220,17 +220,31 @@ export default async function CaseStudy({
           </div>
         </header>
 
-        {/* Divider */}
-        <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', marginBottom: '2.5rem' }} />
+        {/* "Check it out!" — sits right above the divider, below the header */}
+        {data.url && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <a
+              href={data.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="check-out-link"
+            >
+              Check it out →
+            </a>
+          </div>
+        )}
 
-        {/* Summary */}
+        {/* Divider */}
+        <hr style={{ border: 'none', borderTop: '1px solid var(--color-muted)', marginBottom: '2.5rem' }} />
+
+        {/* Summary / description */}
         {data.summary && (
           <p
             style={{
               fontSize: '19px',
               lineHeight: 1.75,
               color: 'var(--color-ink)',
-              marginBottom: '2.5rem',
+              marginBottom: '2rem',
               letterSpacing: '-0.005em',
             }}
           >
@@ -244,9 +258,11 @@ export default async function CaseStudy({
             {data.tags.map(tag => (
               <span
                 key={tag}
+                className="tag-pill"
                 style={{
                   fontFamily: 'var(--font-mono)',
                   fontSize: '10px',
+                  fontWeight: 600,
                   letterSpacing: '0.07em',
                   textTransform: 'uppercase',
                   color: 'var(--color-muted)',

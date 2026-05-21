@@ -12,6 +12,7 @@ export interface Project {
   status: string
   summary: string
   tags: string[]
+  url?: string
 }
 
 export function getAllProjects(): Project[] {

@@ -40,7 +40,7 @@ export default function About() {
         </div>
 
         {/* Divider */}
-        <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '2.5rem 0' }} />
+        <hr style={{ border: 'none', borderTop: '1px solid var(--color-muted)', margin: '2.5rem 0' }} />
 
         {/* Background */}
         <div style={{ marginBottom: '3rem' }}>
@@ -92,7 +92,7 @@ export default function About() {
         </div>
 
         {/* Divider */}
-        <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '2.5rem 0' }} />
+        <hr style={{ border: 'none', borderTop: '1px solid var(--color-muted)', margin: '2.5rem 0' }} />
 
         {/* Contact */}
         <div>
