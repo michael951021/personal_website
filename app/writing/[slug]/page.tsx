@@ -33,7 +33,7 @@ export default async function PostPage({
 
   return (
     <div style={{ paddingTop: '3.5rem', paddingBottom: '6rem' }}>
-      <div style={{ maxWidth: '680px' }}>
+      <div style={{ maxWidth: '100%' }}>
 
         <Link
           href="/writing"
