@@ -1,0 +1,85 @@
+---
+title: Local Multi-Agent Loop
+date: "2026-09-28"
+summary: Ran a two-agent loop and tried to optimize context and task observability both internally between agents and externally for reviewers.
+tags: [Agents, Local LLMs, Observability]
+---
+
+Hi! The goal of this project was to see how a few factors affect a long-term agent loop, and what can be changed to improve. I focused on things like context management, using GPU resources efficiently, and speed.
+
+Note: This is not AI written! Reporting feels like it should be human-made to transfer ideas optimally, just make them shorter! Usually if it can be explained in 50 words, it can mostly be explained in 25.
+
+## Summary:
+
+Ran a two-agent loop and tried to optimize context and task observability both internally between agents and externally for reviewers.
+
+## Context and Observability:
+
+A local Qwen 3.8 27B model was hosted locally and put into a loop that would constantly grab tasks from a TODO list, complete the goal of the task and verify that the goal was achieved. Once confirmed, the agent marks the task complete and continues. This extends towards the two-agent model, but now models are assigned some tags for sequential ordering, so an agent is not able to pick up a task if its predecessor has not been completed. This allows for the idea of parallel workloads, and we will see the higher throughput!
+
+The best thing is how inference is all GPU work, so we get (mostly) free roam over any CPU tasks we want to run concurrently. Consequently, we gather data every few seconds on things like resources being consumed, distribution of our context window, tok/s, etc… You can view a sample [HERE](/writing/local-multi-agent-loop/sample-run.html). The foundation of the project was data, and the only way to improve was to see the details of what was happening.
+
+We then let the models run wild on a task list, generated with OpenAI 3.6 Sol, of about 140 tasks for an “Issue reviewing agent pipeline” that goes to some ML related public codebases, replicates issues, and creates PRs for me to review if it achieves a fix. However, the focus of this report is not on the project, although in the end it was mostly working; it is about how we got to our end result and how we can get there quicker.
+
+## First Run, Room for Improvement (obviously):
+
+So the loop begins. We start off with a task (horribly) titled
+
+> “Add conditional requests: store each endpoint's ETag and send If-None-Match on refresh (a 304 does not count against the rate limit); skip detail fetches for issues whose updated_at has not changed since the last sync.”
+
+Firstly, a mouthful. We want these headers to be easy to read, because then it’s probably easier for an AI model to understand it too. The absolute first fix here was “make it so task descriptions are generally readable, so in isolation it is enough to understand the context of the work, with only the absolute most important technical stack mentioned”. Then we get a better, but still needing improvement header of
+
+> “production-stack toolchain feasibility- For each preferred subsystem in config/repos.yaml, list the toolchains it needs (Go, Python, Rust, Node, Docker, CUDA, Kubernetes) and whether each installs here without root; write FEASIBLE / PARTIAL / INFEASIBLE with reasons to state/repos/production-stack/feasibility.md.”
+
+Now it’s a header and description. Easy to see the goal, and from a high enough level where we kinda get what section we are working on. But you know what would make stuff easier? If we actually knew what section we were on! So beyond adding code diffs, I also added a task to make a tree of the tasks, then for each task show all the layers of the tree until we reach our node. For example, for the task we just described, we have:
+
+<PlanPath>
+  <PlanRow title="review-ready upstream bug fixes in ML-infra repos, found, reproduced and fixed by a local agent loop" why="done = branches with a failing regression test, a minimal fix, green tests, evidence and a PR draft in the repo's own style, across several serving/runtime repos; nothing is published until a human reviews it." />
+  <PlanRow title="Repositories" why="where the goal is met: per repo, learn its rules and tests once (recon), then take its candidates one at a time until a branch is ready for human review or a limit is hit." />
+  <PlanRow title="vllm-project/production-stack (name: production-stack)" why="vLLM's Kubernetes serving stack (router, autoscaling); its first sync found 0 FREE issues, so its fix work may end REPO_EXHAUSTED quickly." />
+  <PlanRow title="production-stack: recon" why="learns the repo's contribution rules, AI policy, toolchains and test baseline once, so fixes follow them and new failures stand out." />
+  <PlanRow title="Steps" why="learn the repo once (rules, AI policy, toolchains, test baseline, PR style, candidates) so every fix attempt follows them." />
+  <PlanRow title="production-stack toolchain feasibility" why="no why given" />
+</PlanPath>
+
+A huge win in observability in my opinion! This makes it easy to see where the task fits and what we should be thinking about when analyzing the agents’ work. We see we are in the review phase of looking at repositories, inside the vllm repo, working on the reconnaissance phase, specifically analyzing the toolchain in a repo. And it is neat this tree is generated once for all tasks, so it is consistent, and adds little overhead.
+
+Lastly, I was not happy with how tasks ended. Agents would claim they achieved their result, but either it was obscure to see what result supported such a claim (since not all tasks were code!), or you would have to sift through code and predict what result was reproduced that gave us confidence. Even worse, when the agent would fail, it would leave its unfinished code and just hope and pray the next agent would finish it off (spoiler: it would not). That is where agent handoff comes in: a short two-line piece written by the agent, instructed to be brief, but give an idea of what it was trying to accomplish, what it tried, why they claim it works or did not work, and what could have helped them achieve their goal faster. These post-mortems would serve to not only help the next agent with unfinished work, but also us the reader to understand how it could have been helped to achieve its result. Which then leads us to one of our biggest things I tried to solve: context.
+
+## Context! Again!
+
+Probably the biggest issue with these long-running sequences is what exactly is in the context. If we allow tasks to run too long, which is common in these long-running scenarios, our context window gets saturated with unrelated information that just hurts our already tiny agent even more. A nice thing, however, was I managed to get most tasks not even hitting the compaction threshold (around 90k tokens from the 128k token window). We can see a sample run of our context:
+
+<ContextChart />
+
+From here we can see most of our context was thinking, and reading! I think a better understanding of the tasks at hand leads to better control of the context, so in the next version the amount read will be significantly decreased. This includes the use of a “repo map” or a Language Server Protocol.
+
+Another big time and resource saver is caching, where we were initially at the low value of … I then swapped us to using llama server instead of the direct ollama api, where now instead of rereading the prompt each time, we would append the new information for our task, resulting in much better cache use!
+
+<CacheReuseChart />
+
+## Two heads are better than one
+
+I was hanging around 70% GPU usage and decided to lower my context window slightly in exchange for almost perfectly fitting a second Qwen 3.8 27B model. With some slight tweaking of the task architecture, it managed to increase my throughput by ~20% and keep the GPU busy while the other waits on tests to run.
+
+<ThroughputChart />
+
+Our tokens per second for each model agent obviously went down, but our total tokens generated went up massively!
+
+## Where did the time go?
+
+<TimeSplitChart />
+
+Generation is a clear winner, likely made slower by the large amount of content read. We see a big win here though with the overhead of the harness, where the llama-server setup had a whopping ~85% less effect on our time! Likely because larger tasks were being done, our tool time also increased.
+
+## Resources
+
+Resource-wise, on a dual 3090 setup I peaked around ~21GB VRAM on both, ran on 450W 92% of the time, and hovered near 90% usage most of the time.
+
+## Conclusions and Future Improvement
+
+Context management is always key with LLMs, and this is a very interesting case to dynamically solve. There were clear winning strategies, and the next version will have much more visibility, and I'm hoping that with enough direction the info that makes reviewing a piece of cake makes coding easy too.
+
+- Linear ticket style tasks with ‘Initiatives’
+- Plan architecture granularity levels
+- Pen-test agent loop

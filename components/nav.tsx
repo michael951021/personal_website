@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { site } from '@/lib/config'
 
 const links = [
+  { href: '/writing', label: 'Writing' },
   { href: '/skills', label: 'Skills' },
   { href: '/about', label: 'About' },
 ]
