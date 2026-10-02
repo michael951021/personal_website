@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { site } from '@/lib/config'
+import { FeaturedProject } from '@/components/featured-project'
 
 export default function Home() {
   return (
@@ -114,6 +115,11 @@ export default function Home() {
           </div>
         </section>
 
+
+        {/* The one pinned project */}
+        <section style={{ marginBottom: '5rem' }}>
+          <FeaturedProject />
+        </section>
 
         {/* Contact */}
         <section>
