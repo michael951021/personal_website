@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import { site } from '@/lib/config'
 import { FeaturedProject } from '@/components/featured-project'
 import { SocialLinks } from '@/components/social-links'
+import { DeepLink } from '@/components/deep-link'
 
 export default function Home() {
   return (
@@ -123,9 +123,11 @@ export default function Home() {
         {/* The one pinned project */}
         <section style={{ marginBottom: '5rem' }}>
           <FeaturedProject />
-          <Link href="/skills" className="bracket-link" style={{ display: 'inline-block', marginTop: '1.1rem' }}>
-            [what have I worked with?]
-          </Link>
+        </section>
+
+        {/* Only visible once you've scrolled into deep water */}
+        <section style={{ display: 'flex', justifyContent: 'center', paddingTop: '2rem' }}>
+          <DeepLink href="/skills">[Go deeper in my skills →]</DeepLink>
         </section>
 
 
