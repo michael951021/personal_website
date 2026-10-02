@@ -188,7 +188,7 @@ function spawnFish(container: HTMLElement, t: number) {
   // Scale tied to depth: close fish loom large, distant fish are tiny silhouettes
   const scale = isAngler
     ? 0.5 + depth * 0.7    // 0.57–0.85 (ANGLER_SVG is 100×65, inherently large)
-    : 0.2 + depth * 1.05   // 0.36–1.09 (FISH_SVG is 70×28)
+    : 0.3 + depth * 1.15   // 0.47–1.45 (FISH_SVG is 70×28)
 
   const baseOpacity = isAngler
     ? 0.38 + Math.random() * 0.18
@@ -299,7 +299,7 @@ export function Underwater() {
       timer = setTimeout(() => {
         if (containerRef.current) spawnFish(containerRef.current, computeT())
         schedule()
-      }, 1000 + Math.random() * 3000)
+      }, 700 + Math.random() * 2200)
     }
     schedule()
 
