@@ -417,3 +417,181 @@
 @media (prefers-reduced-motion: reduce) {
   .live-dot { animation: none; }
 }
+
+/* ─── Skills explorer ────────────────────────────────────────── */
+
+.skill-filters {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin-bottom: 0.7rem;
+}
+
+.skill-chips {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.skill-filter-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  width: 4.25rem;
+  flex-shrink: 0;
+}
+
+.skill-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--color-muted) 40%, transparent);
+  border-radius: 999px;
+  padding: 0.25em 0.8em;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.skill-chip:hover {
+  color: var(--color-ink);
+  border-color: var(--color-muted);
+}
+
+.skill-chip[aria-pressed='true'] {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-bg);
+}
+
+.skill-chip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.skill-chip-count {
+  font-size: 9.5px;
+  opacity: 0.6;
+}
+
+.skill-group-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0 0 0.6rem;
+}
+
+.skill-row {
+  position: relative;
+  border-top: 1px solid var(--color-muted);
+}
+
+.skill-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.85rem 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.skill-fish {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  opacity: 0.55;
+  transition: transform 300ms ease, opacity 200ms ease;
+}
+
+.skill-row:hover .skill-fish,
+.skill-row[data-open='true'] .skill-fish {
+  transform: translateX(5px);
+  opacity: 0.9;
+}
+
+.skill-name {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.skill-where {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  text-align: right;
+}
+
+.skill-caret {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  width: 1rem;
+  text-align: center;
+  color: var(--color-muted);
+  transition: transform 200ms ease;
+}
+
+.skill-row[data-open='true'] .skill-caret {
+  transform: rotate(45deg);
+}
+
+/* Height animates via grid rows: 0fr → 1fr */
+.skill-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 250ms ease;
+}
+
+.skill-row[data-open='true'] .skill-body {
+  grid-template-rows: 1fr;
+}
+
+.skill-body > div {
+  overflow: hidden;
+  padding-left: 2.4rem;
+}
+
+.skill-note {
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--color-ink);
+  margin: 0 0 0.6rem;
+  max-width: 560px;
+}
+
+.skill-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  padding-bottom: 1rem;
+}
+
+button.bracket-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+@media (max-width: 560px) {
+  .skill-where { display: none; }
+  .skill-filters { flex-direction: column; }
+}

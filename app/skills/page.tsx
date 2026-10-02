@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { getAllPosts } from '@/lib/posts'
+import { SKILLS } from '@/lib/skills'
 import { SkillList, type SkillEntry } from '@/components/skill-list'
 
 export const metadata: Metadata = {
@@ -7,21 +8,19 @@ export const metadata: Metadata = {
 }
 
 export default function Skills() {
-  const projects = getAllPosts()
+  const posts = getAllPosts()
 
-  // Build a map: tag → list of projects that use it
-  const tagMap = new Map<string, Array<{ title: string; slug: string }>>()
-  for (const project of projects) {
-    for (const tag of project.tags ?? []) {
-      if (!tagMap.has(tag)) tagMap.set(tag, [])
-      tagMap.get(tag)!.push({ title: project.title, slug: project.slug })
+  // Link each skill to the posts tagged with its name or one of its aliases
+  const norm = (s: string) => s.toLowerCase()
+  const skills: SkillEntry[] = SKILLS.map(skill => {
+    const names = new Set([skill.name, ...(skill.aliases ?? [])].map(norm))
+    return {
+      ...skill,
+      posts: posts
+        .filter(p => p.tags?.some(t => names.has(norm(t))))
+        .map(p => ({ title: p.title, slug: p.slug })),
     }
-  }
-
-  // Sort alphabetically
-  const skills: SkillEntry[] = Array.from(tagMap.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([tag, projs]) => ({ tag, projects: projs }))
+  })
 
   return (
     <div style={{ paddingTop: '5rem', paddingBottom: '6rem' }}>
@@ -47,11 +46,12 @@ export default function Skills() {
             fontSize:     '17px',
             lineHeight:   1.75,
             color:        'var(--color-ink)',
-            marginBottom: '3rem',
-            maxWidth:     '480px',
+            marginBottom: '2rem',
+            maxWidth:     '520px',
           }}
         >
-          Technologies I've used across my work, sorted alphabetically.
+          What I&rsquo;ve worked with, mostly on the ML side. Filter by area or by where I used it, and open a row to
+          see what I actually did with it.
         </p>
 
         <SkillList skills={skills} />

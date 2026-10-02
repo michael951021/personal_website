@@ -1,19 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import { GROUPS, PLACES, type Group, type Place, type Skill } from '@/lib/skills'
 
 // ─── inline fish bullet ───────────────────────────────────────
 // Matches the silhouette from underwater.tsx but rendered small as a list marker.
 
 function FishBullet() {
   return (
-    <svg
-      width="28"
-      height="12"
-      viewBox="0 0 70 28"
-      aria-hidden="true"
-      style={{ flexShrink: 0, opacity: 0.55, color: 'var(--color-muted)' }}
-    >
+    <svg className="skill-fish" width="28" height="12" viewBox="0 0 70 28" aria-hidden="true">
       <ellipse cx="42" cy="14" rx="25" ry="9" fill="currentColor" />
       <polygon points="18,14 4,5 4,23" fill="currentColor" />
       <circle cx="61" cy="11" r="2" fill="rgba(255,255,255,0.55)" />
@@ -21,7 +17,7 @@ function FishBullet() {
   )
 }
 
-// ─── bubble spawner (mirrors project-list.tsx) ────────────────
+// ─── bubble spawner ───────────────────────────────────────────
 
 function spawnBubbles(li: HTMLElement) {
   const nameEl = li.querySelector('.skill-name') as HTMLElement | null
@@ -75,70 +71,147 @@ function spawnBubbles(li: HTMLElement) {
 
 // ─── types ────────────────────────────────────────────────────
 
-export interface SkillEntry {
-  tag: string
-  projects: Array<{ title: string; slug: string }>
+export interface SkillEntry extends Skill {
+  posts: Array<{ title: string; slug: string }>
+}
+
+// ─── filter chips ─────────────────────────────────────────────
+
+function Chip({ active, count, onClick, children }: {
+  active: boolean
+  count: number
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button type="button" className="skill-chip" aria-pressed={active} disabled={!active && count === 0} onClick={onClick}>
+      {children}
+      <span className="skill-chip-count">{count}</span>
+    </button>
+  )
+}
+
+// ─── one row ──────────────────────────────────────────────────
+
+function SkillRow({ skill, open, place, onToggle, onPlace }: {
+  skill: SkillEntry
+  open: boolean
+  place: Place | null
+  onToggle: () => void
+  onPlace: (p: Place) => void
+}) {
+  const id = `skill-${skill.name.replace(/\W+/g, '-').toLowerCase()}`
+  const others = (skill.where ?? []).filter(p => p !== place)
+  return (
+    <li className="skill-row" data-open={open} onMouseEnter={e => spawnBubbles(e.currentTarget)}>
+      <button type="button" className="skill-head" aria-expanded={open} aria-controls={id} onClick={onToggle}>
+        <FishBullet />
+        <span className="skill-name">{skill.name}</span>
+        <span className="skill-where">
+          {(skill.where ?? []).map(p => PLACES[p].label).join(' · ')}
+        </span>
+        <span className="skill-caret" aria-hidden="true">+</span>
+      </button>
+
+      <div id={id} className="skill-body" role="region" aria-label={skill.name}>
+        <div>
+          <p className="skill-note">{skill.note}</p>
+          {(others.length > 0 || skill.posts.length > 0) && (
+            <div className="skill-links">
+              {others.map(p => (
+                <button key={p} type="button" className="bracket-link" onClick={() => onPlace(p)}>
+                  [more from {PLACES[p].label}]
+                </button>
+              ))}
+              {skill.posts.map(post => (
+                <Link key={post.slug} href={`/writing/${post.slug}`} className="bracket-link">
+                  [read: {post.title}]
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </li>
+  )
 }
 
 // ─── component ────────────────────────────────────────────────
 
 export function SkillList({ skills }: { skills: SkillEntry[] }) {
+  const [group, setGroup] = useState<Group | null>(null)
+  const [place, setPlace] = useState<Place | null>(null)
+  const [open, setOpen] = useState<string | null>(null)
+
+  const inPlace = (s: SkillEntry) => !place || (s.where ?? []).includes(place)
+  const inGroup = (s: SkillEntry) => !group || s.group === group
+  const shown = skills.filter(s => inPlace(s) && inGroup(s))
+
+  const pickPlace = (p: Place | null) => {
+    setPlace(p)
+    setGroup(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
-    <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-      {skills.map(({ tag, projects }) => (
-        <li
-          key={tag}
-          style={{
-            borderTop:     '1px solid var(--color-muted)',
-            paddingTop:    '1rem',
-            paddingBottom: '1rem',
-            position:      'relative',
-          }}
-          onMouseEnter={e => spawnBubbles(e.currentTarget)}
-        >
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '2rem', flexWrap: 'wrap' }}>
+    <div>
+      {/* Filters: area of work, and where it was used. Counts respect the other filter. */}
+      <div className="skill-filters">
+        <span className="skill-filter-label">Area</span>
+        <div className="skill-chips">
+          <Chip active={!group} count={skills.filter(inPlace).length} onClick={() => setGroup(null)}>All</Chip>
+          {GROUPS.map(g => (
+            <Chip key={g} active={group === g} count={skills.filter(s => inPlace(s) && s.group === g).length}
+              onClick={() => setGroup(group === g ? null : g)}>
+              {g}
+            </Chip>
+          ))}
+        </div>
+      </div>
+      <div className="skill-filters" style={{ marginBottom: '2.5rem' }}>
+        <span className="skill-filter-label">Where</span>
+        <div className="skill-chips">
+          <Chip active={!place} count={skills.filter(inGroup).length} onClick={() => setPlace(null)}>Anywhere</Chip>
+          {(Object.keys(PLACES) as Place[]).map(p => (
+            <Chip key={p} active={place === p} count={skills.filter(s => inGroup(s) && (s.where ?? []).includes(p)).length}
+              onClick={() => setPlace(place === p ? null : p)}>
+              {PLACES[p].label}
+            </Chip>
+          ))}
+        </div>
+      </div>
 
-            {/* Left: fish bullet + skill name */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <FishBullet />
-              <span
-                className="skill-name"
-                style={{
-                  fontFamily:    'var(--font-serif)',
-                  fontSize:      '17px',
-                  color:         'var(--color-ink)',
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                {tag}
-              </span>
-            </div>
+      {place && 'href' in PLACES[place] && (
+        <p style={{ fontSize: '15px', color: 'var(--color-muted)', margin: '-1.5rem 0 2rem' }}>
+          There&rsquo;s a write-up:{' '}
+          <Link href={(PLACES[place] as { href: string }).href} className="link-underline" style={{ color: 'var(--color-ink)' }}>
+            {PLACES[place].label}
+          </Link>
+        </p>
+      )}
 
-            {/* Right: project links */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem 1rem' }}>
-              {projects.map(p => (
-                <Link
-                  key={p.slug}
-                  href={`/writing/${p.slug}`}
-                  style={{
-                    fontFamily:    'var(--font-mono)',
-                    fontSize:      '11px',
-                    letterSpacing: '0.05em',
-                    color:         'var(--color-muted)',
-                    textDecoration: 'none',
-                    transition:    'opacity 150ms ease',
-                  }}
-                  className="link-fade"
-                >
-                  {p.title}
-                </Link>
-              ))}
-            </div>
-
-          </div>
-        </li>
+      {GROUPS.filter(g => shown.some(s => s.group === g)).map(g => (
+        <section key={g} style={{ marginBottom: '2.25rem' }}>
+          <h2 className="skill-group-title">{g}</h2>
+          <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            {shown.filter(s => s.group === g).map(s => (
+              <SkillRow
+                key={s.name}
+                skill={s}
+                open={open === s.name}
+                place={place}
+                onToggle={() => setOpen(open === s.name ? null : s.name)}
+                onPlace={pickPlace}
+              />
+            ))}
+            <li style={{ borderTop: '1px solid var(--color-muted)' }} />
+          </ol>
+        </section>
       ))}
-      <li style={{ borderTop: '1px solid var(--color-muted)' }} />
-    </ol>
+
+      {shown.length === 0 && (
+        <p style={{ fontSize: '15px', color: 'var(--color-muted)' }}>Nothing in that combination yet.</p>
+      )}
+    </div>
   )
 }
