@@ -128,28 +128,6 @@ export default function Home() {
           </Link>
         </section>
 
-        {/* Contact */}
-        <section>
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: 'var(--color-muted)',
-              marginBottom: '0.6rem',
-            }}
-          >
-            Contact
-          </p>
-          <a
-            href={`mailto:${site.email}`}
-            className="link-underline"
-            style={{ fontSize: '17px', color: 'var(--color-ink)' }}
-          >
-            {site.email}
-          </a>
-        </section>
 
       </div>
     </div>
