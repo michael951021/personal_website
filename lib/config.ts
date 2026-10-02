@@ -5,6 +5,7 @@ export const site = {
   location: 'Ithaca, NY',
   bio: 'I build systems that are fast, clear, and maintainable. Currently at Cornell and working on Computer Vision.',
   available: false,
+  github: 'https://github.com/michael951021',
 }
 
 // The one project pinned on the home page. Swap this out when something newer takes over.

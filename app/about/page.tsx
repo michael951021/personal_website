@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { site } from '@/lib/config'
 
 export const metadata: Metadata = {
@@ -27,15 +28,23 @@ export default function About() {
         {/* Bio */}
         <div style={{ marginBottom: '3.5rem' }}>
           <p style={{ fontSize: '20px', lineHeight: 1.75, marginBottom: '1.4rem', letterSpacing: '-0.01em' }}>
-            [Opening sentence that positions who you are — your role, current institution or employer,
-            and the kind of problems you work on. Write it the way you'd say it to a colleague, not a recruiter.]
+            I&rsquo;m Kevin, a computer science student at Cornell. I like the part of machine learning where the model
+            meets everything around it: the serving stack, what ends up in the context window, and the numbers that
+            tell you whether a change actually helped.
           </p>
           <p style={{ fontSize: '17px', lineHeight: 1.85, color: 'var(--color-ink)', marginBottom: '1.2rem' }}>
-            [Second paragraph. Go a level deeper — what draws you to this area, what questions feel important
-            to you right now. This is where your voice should come through.]
+            This summer I was at <strong style={{ fontWeight: 500 }}>Gail</strong>, working on the realtime voice agent
+            that answers the phone for insurance agencies. Most of my work lived at the edges of a live call: switching
+            speech-to-text providers mid-call so an email address gets spelled out right, racing a second LLM request
+            when the first one stalls, filler phrases in sixteen languages so a slow tool call doesn&rsquo;t sound like a
+            dropped line, and tracing so you can see where every turn spent its time.
           </p>
           <p style={{ fontSize: '17px', lineHeight: 1.85, color: 'var(--color-ink)' }}>
-            [Third paragraph, optional. Current work, ongoing research, or what you're learning.]
+            Right now I&rsquo;m running long-lived agent loops on my own hardware (two 3090s, two Qwen models) and{' '}
+            <Link href="/writing/local-multi-agent-loop" className="link-underline">writing up</Link>{' '}
+            what makes them better. On the side: whether Muon works because its Newton&ndash;Schulz step approximates the polar factor,
+            or because of the shape it gives the singular values; a small cluster manager for local GPUs; and face
+            recognition that runs on encrypted images.
           </p>
         </div>
 
@@ -59,7 +68,8 @@ export default function About() {
           <dl style={{ margin: 0 }}>
             {[
               { label: 'Education', value: 'B.S. Computer Science, Cornell University, 2026' },
-              { label: 'Previously', value: '[Previous role or institution]' },
+              { label: 'Previously', value: 'Gail — realtime voice agents, summer 2026' },
+              { label: 'Now', value: 'Local agent loops, optimizer research' },
               { label: 'Location', value: site.location },
             ].map(({ label, value }) => (
               <div
@@ -113,13 +123,9 @@ export default function About() {
               {site.email}
             </a>
             {' '}is the best way to reach me.
-            I&rsquo;m also on{' '}
-            <a href="https://github.com" className="link-underline">
+            Code is on{' '}
+            <a href={site.github} className="link-underline">
               GitHub
-            </a>
-            {' '}and{' '}
-            <a href="https://linkedin.com" className="link-underline">
-              LinkedIn
             </a>.
           </p>
         </div>
