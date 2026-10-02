@@ -43,8 +43,8 @@ export default function About() {
             Right now I&rsquo;m running long-lived agent loops on my own hardware (two 3090s, two Qwen models) and{' '}
             <Link href="/writing/local-multi-agent-loop" className="link-underline">writing up</Link>{' '}
             what makes them better. On the side: whether Muon works because its Newton&ndash;Schulz step approximates the polar factor,
-            or because of the shape it gives the singular values; a small cluster manager for local GPUs; and face
-            recognition that runs on encrypted images.
+            or because of the shape it gives the singular values; a small cluster manager for local GPUs; and a demo
+            for face recognition that runs on encrypted images.
           </p>
         </div>
 
