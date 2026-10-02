@@ -3,7 +3,7 @@ export const site = {
   email: 'kjr64@cornell.edu',
   role: 'Software Engineer',
   location: 'Ithaca, NY',
-  bio: 'I build systems that are fast, clear, and maintainable. Currently at Cornell and working on Computer Vision.',
+  bio: 'I build systems that are fast, clear, and maintainable. Currently at Cornell and working on agent orchestration and resource management.',
   available: false,
   github: 'https://github.com/michael951021',
   linkedin: 'https://www.linkedin.com/in/kevin-jay-rodriguez/',
