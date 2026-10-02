@@ -91,7 +91,6 @@ function ensureStyles() {
       50%      { transform: rotate(var(--sway, 2deg)); }
     }
     .coral-sway { transform-origin: 50% 100%; animation: coralSway var(--dur, 7s) ease-in-out var(--delay, 0s) infinite; }
-    @media (max-width: 760px) { .coral-bed { display: none; } }
     @media (prefers-reduced-motion: reduce) { .coral-sway { animation: none; } }
 
     @keyframes orbFloat {
@@ -197,55 +196,68 @@ const SOFT_CORAL_SVG = [
   '</svg>',
 ].join('')
 
-// x is a fraction of the side margin (0 = screen edge); mirrored on the right-hand bed.
-interface CoralSpec { svg: string; x: number; scale: number; sway: number }
+interface CoralSpec { svg: string; scale: number; sway: number }
 
 const SHALLOW_BED: CoralSpec[] = [
-  { svg: KELP_SVG, x: 0.08, scale: 1.1, sway: 4 },
-  { svg: STAGHORN_SVG, x: 0.3, scale: 0.95, sway: 1.5 },
-  { svg: SEA_FAN_SVG, x: 0.62, scale: 0.75, sway: 2.5 },
-  { svg: KELP_SVG, x: 0.85, scale: 0.8, sway: 5 },
+  { svg: KELP_SVG, scale: 1.05, sway: 4 },
+  { svg: STAGHORN_SVG, scale: 0.9, sway: 1.5 },
+  { svg: SEA_FAN_SVG, scale: 0.75, sway: 2.5 },
+  { svg: KELP_SVG, scale: 0.8, sway: 5 },
+  { svg: STAGHORN_SVG, scale: 0.7, sway: 2 },
 ]
 
 const DEEP_BED: CoralSpec[] = [
-  { svg: SOFT_CORAL_SVG, x: 0.1, scale: 1, sway: 2 },
-  { svg: BRAIN_CORAL_SVG, x: 0.38, scale: 0.85, sway: 0 },
-  { svg: TUBE_WORMS_SVG, x: 0.7, scale: 0.9, sway: 1 },
+  { svg: SOFT_CORAL_SVG, scale: 0.95, sway: 2 },
+  { svg: BRAIN_CORAL_SVG, scale: 0.8, sway: 0 },
+  { svg: TUBE_WORMS_SVG, scale: 0.85, sway: 1 },
 ]
 
-interface CoralBeds { shallow: HTMLElement; deep: HTMLElement }
+// Average gap between coral along the bottom edge; jittered so it doesn't read as a grid
+const CORAL_SPACING = 200
+
+interface CoralBeds { shallow: HTMLElement; deep: HTMLElement; relayout: () => void }
 
 function spawnCoral(container: HTMLElement): CoralBeds {
-  // Beds sit in the side margins outside the 960px content column
-  const margin = Math.max(110, (window.innerWidth - 960) / 2)
-
-  const makeBed = (specs: CoralSpec[], color: string, opacity: number) => {
+  const makeBed = (color: string) => {
     const bed = document.createElement('div')
-    bed.className = 'coral-bed'
     bed.style.cssText = `position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity 600ms ease;color:${color};`
-    for (const side of ['left', 'right'] as const) {
-      specs.forEach((spec, i) => {
-        const outer = document.createElement('div')
-        outer.style.cssText = `position:fixed;bottom:-6px;${side}:${spec.x * (margin - 60)}px;` +
-          `transform:scale(${spec.scale}) scaleX(${side === 'right' ? -1 : 1});transform-origin:50% 100%;opacity:${opacity};`
-        const inner = document.createElement('div')
-        inner.className = 'coral-sway'
-        inner.style.setProperty('--sway', spec.sway + 'deg')
-        inner.style.setProperty('--dur', 6 + ((i * 1.7) % 4) + 's')
-        inner.style.setProperty('--delay', -(i * 1.3 + (side === 'right' ? 2 : 0)) + 's')
-        inner.innerHTML = spec.svg
-        outer.appendChild(inner)
-        bed.appendChild(outer)
-      })
-    }
     container.appendChild(bed)
     return bed
   }
 
-  return {
-    shallow: makeBed(SHALLOW_BED, 'rgb(70,130,200)', 0.22),
-    deep: makeBed(DEEP_BED, 'rgb(28,68,128)', 0.7),
+  // Spread one coral per slot across the full width, cycling through the bed's specs
+  const fill = (bed: HTMLElement, specs: CoralSpec[], opacity: number) => {
+    bed.replaceChildren()
+    const slots = Math.max(2, Math.round(window.innerWidth / CORAL_SPACING))
+    const step = window.innerWidth / slots
+    const first = Math.floor(Math.random() * specs.length)
+    for (let i = 0; i < slots; i++) {
+      const spec = specs[(first + i) % specs.length]
+      const x = step * (i + 0.5) + (Math.random() - 0.5) * step * 0.4
+      const scale = spec.scale * (0.85 + Math.random() * 0.25)
+      const flip = Math.random() < 0.5 ? -1 : 1
+      const outer = document.createElement('div')
+      outer.style.cssText = `position:fixed;bottom:-6px;left:${x}px;opacity:${opacity};transform-origin:50% 100%;` +
+        `transform:translateX(-50%) scale(${scale}) scaleX(${flip});`
+      const inner = document.createElement('div')
+      inner.className = 'coral-sway'
+      inner.style.setProperty('--sway', spec.sway + 'deg')
+      inner.style.setProperty('--dur', 6 + Math.random() * 4 + 's')
+      inner.style.setProperty('--delay', -Math.random() * 8 + 's')
+      inner.innerHTML = spec.svg
+      outer.appendChild(inner)
+      bed.appendChild(outer)
+    }
   }
+
+  const shallow = makeBed('rgb(70,130,200)')
+  const deep = makeBed('rgb(28,68,128)')
+  const relayout = () => {
+    fill(shallow, SHALLOW_BED, 0.2)
+    fill(deep, DEEP_BED, 0.65)
+  }
+  relayout()
+  return { shallow, deep, relayout }
 }
 
 const smoothstep = (a: number, b: number, x: number) => {
@@ -434,6 +446,18 @@ export function Underwater() {
     }
     window.addEventListener('scroll', onScroll, { passive: true })
 
+    let lastWidth = window.innerWidth
+    let resizeTimer: ReturnType<typeof setTimeout>
+    const onResize = () => {
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => {
+        if (window.innerWidth === lastWidth) return
+        lastWidth = window.innerWidth
+        coral?.relayout()
+      }, 200)
+    }
+    window.addEventListener('resize', onResize)
+
     let timer: ReturnType<typeof setTimeout>
     const schedule = () => {
       timer = setTimeout(() => {
@@ -445,6 +469,8 @@ export function Underwater() {
 
     return () => {
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResize)
+      clearTimeout(resizeTimer)
       cancelAnimationFrame(raf)
       clearTimeout(timer)
       coral?.shallow.remove()
