@@ -24,6 +24,9 @@ export function Footer() {
           <a href={site.github} className="transition-opacity duration-150 hover:opacity-55">
             GitHub
           </a>
+          <a href={site.linkedin} className="transition-opacity duration-150 hover:opacity-55">
+            LinkedIn
+          </a>
           <a
             href={`mailto:${site.email}`}
             className="transition-opacity duration-150 hover:opacity-55"

@@ -6,6 +6,7 @@ export const site = {
   bio: 'I build systems that are fast, clear, and maintainable. Currently at Cornell and working on Computer Vision.',
   available: false,
   github: 'https://github.com/michael951021',
+  linkedin: 'https://www.linkedin.com/in/kevin-jay-rodriguez/',
 }
 
 // The one project pinned on the home page. Swap this out when something newer takes over.

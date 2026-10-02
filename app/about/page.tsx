@@ -126,6 +126,10 @@ export default function About() {
             Code is on{' '}
             <a href={site.github} className="link-underline">
               GitHub
+            </a>
+            , and I&rsquo;m on{' '}
+            <a href={site.linkedin} className="link-underline">
+              LinkedIn
             </a>.
           </p>
         </div>
