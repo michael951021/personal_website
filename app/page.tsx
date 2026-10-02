@@ -102,9 +102,7 @@ export default function Home() {
                     borderRadius: '50%',
                     objectFit: 'cover',
                     display: 'block',
-                    opacity: 0.82,
-                    filter:
-                      'saturate(0.45) sepia(0.12) hue-rotate(190deg) brightness(0.88)',
+                    filter: 'saturate(0.85) brightness(0.97)',
                     boxShadow:
                       '0 0 28px rgba(18,52,110,0.20), 0 0 56px rgba(18,52,110,0.10)',
                   }}
