@@ -119,7 +119,7 @@ export function SkillList({ skills }: { skills: SkillEntry[] }) {
               {projects.map(p => (
                 <Link
                   key={p.slug}
-                  href={`/work/${p.slug}`}
+                  href={`/writing/${p.slug}`}
                   style={{
                     fontFamily:    'var(--font-mono)',
                     fontSize:      '11px',

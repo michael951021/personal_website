@@ -83,6 +83,14 @@ export default async function PostPage({
           </div>
         </header>
 
+        {data.url && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <a href={data.url} target="_blank" rel="noopener noreferrer" className="check-out-link">
+              Check it out →
+            </a>
+          </div>
+        )}
+
         <hr style={{ border: 'none', borderTop: '1px solid var(--color-muted)', marginBottom: '2rem' }} />
 
         <article>

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getAllProjects } from '@/lib/projects'
+import { getAllPosts } from '@/lib/posts'
 import { SkillList, type SkillEntry } from '@/components/skill-list'
 
 export const metadata: Metadata = {
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 }
 
 export default function Skills() {
-  const projects = getAllProjects()
+  const projects = getAllPosts()
 
   // Build a map: tag → list of projects that use it
   const tagMap = new Map<string, Array<{ title: string; slug: string }>>()

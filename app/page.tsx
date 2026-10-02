@@ -1,12 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { getAllProjects } from '@/lib/projects'
 import { site } from '@/lib/config'
-import { ProjectList } from '@/components/project-list'
 
 export default function Home() {
-  const projects = getAllProjects()
-
   return (
     <div style={{ paddingTop: '16vh', paddingBottom: '6rem' }}>
       <div style={{}}>
@@ -118,25 +114,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Work list */}
-        {projects.length > 0 && (
-          <section style={{ marginBottom: '5rem' }}>
-            <p
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color: 'var(--color-muted)',
-                marginBottom: '1.5rem',
-              }}
-            >
-              Work
-            </p>
-
-            <ProjectList projects={projects} />
-          </section>
-        )}
 
         {/* Contact */}
         <section>

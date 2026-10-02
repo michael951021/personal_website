@@ -7,9 +7,10 @@ const contentDir = path.join(process.cwd(), 'content/writing')
 export interface Post {
   slug: string
   title: string
-  date: string // YYYY-MM-DD
+  date: string // YYYY-MM-DD, or YYYY for older write-ups
   summary: string
   tags: string[]
+  url?: string
 }
 
 export function getAllPosts(): Post[] {
@@ -33,5 +34,6 @@ export function getPost(slug: string): { data: Post; content: string } | null {
 }
 
 export function formatDate(date: string): string {
+  if (/^\d{4}$/.test(date)) return date
   return new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
