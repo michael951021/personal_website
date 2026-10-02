@@ -20,20 +20,12 @@ export function Footer() {
         }}
       >
         <span>{new Date().getFullYear()}</span>
-        <span className="flex gap-6">
-          <a href={site.github} className="transition-opacity duration-150 hover:opacity-55">
-            GitHub
-          </a>
-          <a href={site.linkedin} className="transition-opacity duration-150 hover:opacity-55">
-            LinkedIn
-          </a>
-          <a
-            href={`mailto:${site.email}`}
-            className="transition-opacity duration-150 hover:opacity-55"
-          >
-            {site.email}
-          </a>
-        </span>
+        <a
+          href={`mailto:${site.email}`}
+          className="transition-opacity duration-150 hover:opacity-55"
+        >
+          {site.email}
+        </a>
       </div>
     </footer>
   )

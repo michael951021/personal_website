@@ -622,3 +622,43 @@ button.bracket-link {
   background-color: rgba(85, 152, 215, 0.25);
   color: inherit;
 }
+
+/* ─── Social buttons (under the portrait) ────────────────────── */
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 0.7rem;
+  width: 140px;
+}
+
+.social-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: var(--color-ink);
+  border: 1px solid color-mix(in srgb, var(--color-muted) 45%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 60%, transparent);
+  box-shadow: 0 2px 8px rgba(18, 52, 110, 0.08);
+  transition: transform 180ms ease, background-color 180ms ease, color 180ms ease,
+    border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.social-button:hover {
+  transform: translateY(-2px);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(18, 52, 110, 0.22);
+}
+
+.social-github:hover {
+  background: #24292f;
+  border-color: #24292f;
+}
+
+.social-linkedin:hover {
+  background: #0a66c2;
+  border-color: #0a66c2;
+}

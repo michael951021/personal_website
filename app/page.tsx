@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { site } from '@/lib/config'
 import { FeaturedProject } from '@/components/featured-project'
+import { SocialLinks } from '@/components/social-links'
 
 export default function Home() {
   return (
@@ -107,6 +108,11 @@ export default function Home() {
                       '0 0 28px rgba(18,52,110,0.20), 0 0 56px rgba(18,52,110,0.10)',
                   }}
                 />
+              </div>
+
+              {/* Centred under the portrait (the 42px tail gutter sits to its left) */}
+              <div style={{ paddingLeft: '42px', marginTop: '1.1rem' }}>
+                <SocialLinks />
               </div>
             </div>
 
