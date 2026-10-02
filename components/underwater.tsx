@@ -86,6 +86,14 @@ function ensureStyles() {
     }
     .lure-pulse { animation: lurePulse 2.2s ease-in-out infinite; }
 
+    @keyframes coralSway {
+      0%, 100% { transform: rotate(calc(var(--sway, 2deg) * -1)); }
+      50%      { transform: rotate(var(--sway, 2deg)); }
+    }
+    .coral-sway { transform-origin: 50% 100%; animation: coralSway var(--dur, 7s) ease-in-out var(--delay, 0s) infinite; }
+    @media (max-width: 760px) { .coral-bed { display: none; } }
+    @media (prefers-reduced-motion: reduce) { .coral-sway { animation: none; } }
+
     @keyframes orbFloat {
       0%   { transform: translateY(0px) translateX(0px); opacity: 0; }
       10%  { opacity: var(--op, 0.3); }
@@ -121,6 +129,129 @@ const ANGLER_SVG = [
   '<circle cx="87" cy="1" r="2" fill="white" opacity="0.96"/>',
   '</svg>',
 ].join('')
+
+// ─── coral SVGs ───────────────────────────────────────────────
+// Same flat-silhouette style as the fish: currentColor shapes with faint white accents.
+// Shallow beds are fish-blue; deep beds are angler-navy with lure-coloured glow.
+
+const STAGHORN_SVG = [
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" width="120" height="140" aria-hidden="true">',
+  '<path d="M60,140 L60,92 M60,108 L38,72 L30,42 M38,72 L50,50 M60,92 L80,60 L74,30 M80,60 L98,42 M60,92 L58,62"',
+  ' stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
+  '<circle cx="30" cy="42" r="2" fill="rgba(255,255,255,0.45)"/>',
+  '<circle cx="74" cy="30" r="2" fill="rgba(255,255,255,0.45)"/>',
+  '<circle cx="98" cy="42" r="2" fill="rgba(255,255,255,0.45)"/>',
+  '</svg>',
+].join('')
+
+const SEA_FAN_SVG = [
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 130" width="110" height="130" aria-hidden="true">',
+  '<path d="M10,62 A45,45 0 0 1 100,62 L57,112 Z" fill="currentColor" opacity="0.8"/>',
+  '<path d="M57,112 L18,40 M57,112 L36,22 M57,112 L57,17 M57,112 L78,22 M57,112 L94,40"',
+  ' stroke="rgba(255,255,255,0.22)" stroke-width="1.5" fill="none"/>',
+  '<path d="M57,130 L57,108" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>',
+  '</svg>',
+].join('')
+
+const KELP_SVG = [
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 200" width="50" height="200" aria-hidden="true">',
+  '<path d="M25,200 Q12,160 25,120 Q38,80 25,40 Q18,20 24,4" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>',
+  '<ellipse cx="14" cy="150" rx="10" ry="4" transform="rotate(-30 14 150)" fill="currentColor"/>',
+  '<ellipse cx="36" cy="105" rx="10" ry="4" transform="rotate(30 36 105)" fill="currentColor"/>',
+  '<ellipse cx="15" cy="62" rx="9" ry="3.5" transform="rotate(-30 15 62)" fill="currentColor"/>',
+  '<ellipse cx="33" cy="24" rx="8" ry="3" transform="rotate(30 33 24)" fill="currentColor"/>',
+  '</svg>',
+].join('')
+
+const TUBE_WORMS_SVG = [
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 130" width="100" height="130" style="overflow:visible" aria-hidden="true">',
+  '<rect x="16" y="50" width="12" height="80" rx="6" fill="currentColor"/>',
+  '<rect x="40" y="22" width="13" height="108" rx="6.5" fill="currentColor"/>',
+  '<rect x="66" y="64" width="11" height="66" rx="5.5" fill="currentColor"/>',
+  '<circle cx="22" cy="50" r="7" fill="#55ccff" class="lure-pulse"/>',
+  '<circle cx="46.5" cy="22" r="8" fill="#55ccff" class="lure-pulse" style="animation-delay:-0.8s"/>',
+  '<circle cx="71.5" cy="64" r="6.5" fill="#55ccff" class="lure-pulse" style="animation-delay:-1.5s"/>',
+  '<circle cx="22" cy="50" r="2.5" fill="#99eeff" opacity="0.8"/>',
+  '<circle cx="46.5" cy="22" r="3" fill="#99eeff" opacity="0.8"/>',
+  '<circle cx="71.5" cy="64" r="2.5" fill="#99eeff" opacity="0.8"/>',
+  '</svg>',
+].join('')
+
+const BRAIN_CORAL_SVG = [
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 70" width="120" height="70" aria-hidden="true">',
+  '<path d="M4,70 Q4,8 60,8 Q116,8 116,70 Z" fill="currentColor"/>',
+  '<path d="M22,58 Q30,34 44,44 Q56,54 62,32 Q70,14 84,30 Q96,44 100,58"',
+  ' stroke="rgba(255,255,255,0.16)" stroke-width="2" fill="none" stroke-linecap="round"/>',
+  '<path d="M32,64 Q40,50 52,58 Q64,66 72,48 Q80,36 92,62"',
+  ' stroke="rgba(255,255,255,0.12)" stroke-width="2" fill="none" stroke-linecap="round"/>',
+  '</svg>',
+].join('')
+
+const SOFT_CORAL_SVG = [
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 150" width="90" height="150" style="overflow:visible" aria-hidden="true">',
+  '<path d="M45,150 Q44,110 45,90 Q30,70 22,40 M45,90 Q60,66 68,30 M45,104 Q42,70 46,22"',
+  ' stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round"/>',
+  '<circle cx="22" cy="40" r="5" fill="#55ccff" opacity="0.35"/>',
+  '<circle cx="68" cy="30" r="5" fill="#55ccff" opacity="0.35"/>',
+  '<circle cx="46" cy="22" r="6" fill="#55ccff" class="lure-pulse"/>',
+  '</svg>',
+].join('')
+
+// x is a fraction of the side margin (0 = screen edge); mirrored on the right-hand bed.
+interface CoralSpec { svg: string; x: number; scale: number; sway: number }
+
+const SHALLOW_BED: CoralSpec[] = [
+  { svg: KELP_SVG, x: 0.08, scale: 1.1, sway: 4 },
+  { svg: STAGHORN_SVG, x: 0.3, scale: 0.95, sway: 1.5 },
+  { svg: SEA_FAN_SVG, x: 0.62, scale: 0.75, sway: 2.5 },
+  { svg: KELP_SVG, x: 0.85, scale: 0.8, sway: 5 },
+]
+
+const DEEP_BED: CoralSpec[] = [
+  { svg: SOFT_CORAL_SVG, x: 0.1, scale: 1, sway: 2 },
+  { svg: BRAIN_CORAL_SVG, x: 0.38, scale: 0.85, sway: 0 },
+  { svg: TUBE_WORMS_SVG, x: 0.7, scale: 0.9, sway: 1 },
+]
+
+interface CoralBeds { shallow: HTMLElement; deep: HTMLElement }
+
+function spawnCoral(container: HTMLElement): CoralBeds {
+  // Beds sit in the side margins outside the 960px content column
+  const margin = Math.max(110, (window.innerWidth - 960) / 2)
+
+  const makeBed = (specs: CoralSpec[], color: string, opacity: number) => {
+    const bed = document.createElement('div')
+    bed.className = 'coral-bed'
+    bed.style.cssText = `position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity 600ms ease;color:${color};`
+    for (const side of ['left', 'right'] as const) {
+      specs.forEach((spec, i) => {
+        const outer = document.createElement('div')
+        outer.style.cssText = `position:fixed;bottom:-6px;${side}:${spec.x * (margin - 60)}px;` +
+          `transform:scale(${spec.scale}) scaleX(${side === 'right' ? -1 : 1});transform-origin:50% 100%;opacity:${opacity};`
+        const inner = document.createElement('div')
+        inner.className = 'coral-sway'
+        inner.style.setProperty('--sway', spec.sway + 'deg')
+        inner.style.setProperty('--dur', 6 + ((i * 1.7) % 4) + 's')
+        inner.style.setProperty('--delay', -(i * 1.3 + (side === 'right' ? 2 : 0)) + 's')
+        inner.innerHTML = spec.svg
+        outer.appendChild(inner)
+        bed.appendChild(outer)
+      })
+    }
+    container.appendChild(bed)
+    return bed
+  }
+
+  return {
+    shallow: makeBed(SHALLOW_BED, 'rgb(70,130,200)', 0.22),
+    deep: makeBed(DEEP_BED, 'rgb(28,68,128)', 0.7),
+  }
+}
+
+const smoothstep = (a: number, b: number, x: number) => {
+  const u = Math.max(0, Math.min(1, (x - a) / (b - a)))
+  return u * u * (3 - 2 * u)
+}
 
 // ─── orbs ─────────────────────────────────────────────────────
 
@@ -251,7 +382,11 @@ export function Underwater() {
     ensureStyles()
 
     let orbRefs: OrbRef[] = []
-    if (containerRef.current) orbRefs = spawnOrbs(containerRef.current)
+    let coral: CoralBeds | null = null
+    if (containerRef.current) {
+      coral = spawnCoral(containerRef.current)
+      orbRefs = spawnOrbs(containerRef.current)
+    }
 
     const computeT = () => {
       const max = document.body.scrollHeight - window.innerHeight
@@ -272,6 +407,11 @@ export function Underwater() {
     const applyAll = (t: number) => {
       applyDepth(t)
       if (rays) rays.style.opacity = String(Math.max(0, 0.22 - t * 0.2))
+      // Shallow coral gives way to the deep bed as the water darkens
+      if (coral) {
+        coral.shallow.style.opacity = String(1 - smoothstep(0.35, 0.6, t))
+        coral.deep.style.opacity = String(smoothstep(0.5, 0.8, t))
+      }
     }
 
     applyAll(computeT())
@@ -307,6 +447,8 @@ export function Underwater() {
       window.removeEventListener('scroll', onScroll)
       cancelAnimationFrame(raf)
       clearTimeout(timer)
+      coral?.shallow.remove()
+      coral?.deep.remove()
       for (const k of Object.keys(PALETTE)) {
         document.documentElement.style.removeProperty(`--${k}`)
       }
