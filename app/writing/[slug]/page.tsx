@@ -52,50 +52,53 @@ export default async function PostPage({
           ← Writing
         </Link>
 
-        <header style={{ marginBottom: '2rem' }}>
-          <h1
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '32px',
-              fontWeight: 400,
-              letterSpacing: '-0.02em',
-              lineHeight: 1.2,
-              color: 'var(--color-ink)',
-              marginBottom: '1rem',
-            }}
-          >
-            {data.title}
-          </h1>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '0.5rem 1.25rem',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
-              letterSpacing: '0.07em',
-              textTransform: 'uppercase',
-              color: 'var(--color-muted)',
-            }}
-          >
-            <span>{formatDate(data.date)}</span>
-            {data.tags?.map(tag => <span key={tag}>· {tag}</span>)}
-          </div>
-        </header>
+        {/* Fixed light palette for reading; the ocean stays visible around it */}
+        <div className="reading-panel">
+          <header style={{ marginBottom: '2rem' }}>
+            <h1
+              style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: '32px',
+                fontWeight: 400,
+                letterSpacing: '-0.02em',
+                lineHeight: 1.2,
+                color: 'var(--color-ink)',
+                marginBottom: '1rem',
+              }}
+            >
+              {data.title}
+            </h1>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem 1.25rem',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                letterSpacing: '0.07em',
+                textTransform: 'uppercase',
+                color: 'var(--color-muted)',
+              }}
+            >
+              <span>{formatDate(data.date)}</span>
+              {data.tags?.map(tag => <span key={tag}>· {tag}</span>)}
+            </div>
+          </header>
 
-        {data.url && (
-          <div style={{ marginBottom: '1.5rem' }}>
-            <a href={data.url} target="_blank" rel="noopener noreferrer" className="check-out-link">
-              Check it out →
-            </a>
-          </div>
-        )}
+          {data.url && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <a href={data.url} target="_blank" rel="noopener noreferrer" className="check-out-link">
+                Check it out →
+              </a>
+            </div>
+          )}
 
-        <hr style={{ border: 'none', borderTop: '1px solid var(--color-muted)', marginBottom: '2rem' }} />
+          <hr style={{ border: 'none', borderTop: '1px solid var(--color-muted)', marginBottom: '2rem' }} />
 
-        <article>
-          <MDXRemote source={content} components={{ ...mdxComponents, ...writingComponents }} />
-        </article>
+          <article>
+            <MDXRemote source={content} components={{ ...mdxComponents, ...writingComponents }} />
+          </article>
+        </div>
 
       </div>
     </div>
