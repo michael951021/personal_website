@@ -123,6 +123,9 @@ export default function Home() {
         {/* The one pinned project */}
         <section style={{ marginBottom: '5rem' }}>
           <FeaturedProject />
+          <Link href="/skills" className="bracket-link" style={{ display: 'inline-block', marginTop: '1.1rem' }}>
+            [what have I worked with?]
+          </Link>
         </section>
 
         {/* Contact */}

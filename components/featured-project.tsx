@@ -43,9 +43,6 @@ export function FeaturedProject() {
         <a href={current.runUrl} target="_blank" rel="noopener noreferrer" className="check-out-link">
           See a run ↗
         </a>
-        <Link href="/skills" className="bracket-link">
-          [what have I worked with?]
-        </Link>
       </div>
     </div>
   )
