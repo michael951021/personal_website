@@ -593,6 +593,7 @@ button.bracket-link {
 
 @media (max-width: 560px) {
   .skill-where { display: none; }
+  .skill-caret { margin-left: auto; }
   .skill-filters { flex-direction: column; }
 }
 
