@@ -127,7 +127,7 @@ export default function Home() {
 
         {/* Only visible once you've scrolled into deep water */}
         <section style={{ display: 'flex', justifyContent: 'center', paddingTop: '2rem' }}>
-          <DeepLink href="/skills">[Go deeper in my skills →]</DeepLink>
+          <DeepLink href="/skills">Go deeper in my skills</DeepLink>
         </section>
 
 

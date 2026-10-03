@@ -670,7 +670,6 @@ button.bracket-link {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.7rem;
   font-family: var(--font-mono);
   font-size: 13px;
   letter-spacing: 0.05em;
@@ -700,20 +699,3 @@ button.bracket-link {
   border-color: rgba(85, 204, 255, 0.7);
 }
 
-.deep-link-lure {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #99eeff;
-  box-shadow: 0 0 6px 2px rgba(85, 204, 255, 0.8), 0 0 16px 6px rgba(85, 204, 255, 0.35);
-  animation: deep-lure-pulse 2.2s ease-in-out infinite;
-}
-
-@keyframes deep-lure-pulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.45; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .deep-link-lure { animation: none; }
-}

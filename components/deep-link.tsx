@@ -31,7 +31,6 @@ export function DeepLink({ href, children }: { href: string; children: React.Rea
       aria-hidden={glow === 0 ? true : undefined}
       tabIndex={glow === 0 ? -1 : undefined}
     >
-      <span className="deep-link-lure" aria-hidden="true" />
       {children}
     </Link>
   )
