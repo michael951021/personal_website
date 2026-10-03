@@ -19,10 +19,10 @@ export default function Home() {
               <h1
                 style={{
                   fontFamily: 'var(--font-serif)',
-                  fontSize: '30px',
+                  fontSize: 'var(--text-2xl)',
                   fontWeight: 400,
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1.2,
+                  letterSpacing: '-0.025em',
+                  lineHeight: 1.1,
                   marginBottom: '1.25rem',
                   color: 'var(--color-ink)',
                 }}

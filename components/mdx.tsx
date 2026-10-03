@@ -6,7 +6,7 @@ export const mdxComponents = {
       {...props}
       style={{
         fontFamily: 'var(--font-serif)',
-        fontSize: '26px',
+        fontSize: 'var(--text-lg)',
         fontWeight: 400,
         letterSpacing: '-0.015em',
         lineHeight: 1.3,
@@ -21,7 +21,7 @@ export const mdxComponents = {
       {...props}
       style={{
         fontFamily: 'var(--font-serif)',
-        fontSize: '20px',
+        fontSize: 'var(--text-md)',
         fontWeight: 400,
         letterSpacing: '-0.01em',
         lineHeight: 1.4,

@@ -27,19 +27,7 @@ export default function Skills() {
       <div style={{ maxWidth: '720px' }}>
 
         {/* Heading */}
-        <h1
-          style={{
-            fontFamily:    'var(--font-mono)',
-            fontSize:      '11px',
-            fontWeight:    400,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color:         'var(--color-muted)',
-            marginBottom:  '0.5rem',
-          }}
-        >
-          Skills
-        </h1>
+        <h1 className="page-title">Skills</h1>
 
         <p
           style={{

@@ -11,23 +11,11 @@ export default function About() {
     <div style={{ paddingTop: '5rem', paddingBottom: '6rem' }}>
       <div style={{ maxWidth: '680px' }}>
 
-        <h1
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '11px',
-            fontWeight: 400,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: 'var(--color-muted)',
-            marginBottom: '3rem',
-          }}
-        >
-          About
-        </h1>
+        <h1 className="page-title" style={{ marginBottom: '2.5rem' }}>About</h1>
 
         {/* Bio */}
         <div style={{ marginBottom: '3.5rem' }}>
-          <p style={{ fontSize: '20px', lineHeight: 1.75, marginBottom: '1.4rem', letterSpacing: '-0.01em' }}>
+          <p style={{ fontSize: 'var(--text-md)', lineHeight: 1.6, marginBottom: '1.4rem', letterSpacing: '-0.01em' }}>
             I&rsquo;m Kevin, a computer science student at Cornell. I like the part of machine learning where the model
             meets everything around it: the serving stack, what ends up in the context window, and the numbers that
             tell you whether a change actually helped.

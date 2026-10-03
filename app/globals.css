@@ -41,6 +41,15 @@
   --color-border: #E0DBD4;
   --color-surface: #EDEAE4;
 
+  /* Type scale, ratio ≈1.25 from a 17px base */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 17px;
+  --text-md: 21px;
+  --text-lg: 26px;
+  --text-xl: 33px;
+  --text-2xl: 42px;
+
   --font-serif: var(--font-newsreader), Georgia, 'Times New Roman', serif;
   --font-mono: var(--font-jetbrains), 'Courier New', monospace;
 }
@@ -201,6 +210,22 @@
   margin: 2.5rem 0;
 }
 
+/* ─── Page titles ────────────────────────────────────────────── */
+
+.page-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  color: var(--color-ink);
+  margin: 0 0 1rem;
+}
+
+@media (max-width: 560px) {
+  .page-title { font-size: var(--text-xl); }
+}
+
 /* ─── Shared interactive styles ──────────────────────────────── */
 
 .link-underline {
@@ -355,7 +380,7 @@
 
 .featured-title {
   font-family: var(--font-serif);
-  font-size: 24px;
+  font-size: var(--text-lg);
   letter-spacing: -0.015em;
   line-height: 1.25;
   color: var(--color-ink);

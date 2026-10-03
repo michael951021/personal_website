@@ -6,9 +6,10 @@ import { Underwater } from '@/components/underwater'
 import { site } from '@/lib/config'
 import './globals.css'
 
+// Variable font with the optical-size axis: headings get Newsreader's display cuts automatically
 const newsreader = Newsreader({
   subsets: ['latin'],
-  weight: ['300', '400', '500'],
+  axes: ['opsz'],
   style: ['normal', 'italic'],
   variable: '--font-newsreader',
   display: 'swap',

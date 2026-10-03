@@ -58,10 +58,10 @@ export default async function PostPage({
             <h1
               style={{
                 fontFamily: 'var(--font-serif)',
-                fontSize: '32px',
+                fontSize: 'var(--text-2xl)',
                 fontWeight: 400,
-                letterSpacing: '-0.02em',
-                lineHeight: 1.2,
+                letterSpacing: '-0.025em',
+                lineHeight: 1.1,
                 color: 'var(--color-ink)',
                 marginBottom: '1rem',
               }}
