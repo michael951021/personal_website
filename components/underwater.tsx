@@ -302,7 +302,11 @@ function spawnOrbs(container: HTMLElement): OrbRef[] {
 
 // ─── fish ─────────────────────────────────────────────────────
 
+// Safety cap on fish in the water at once
+const MAX_FISH = 14
+
 function spawnFish(container: HTMLElement, t: number) {
+  if (container.querySelectorAll('.fish').length >= MAX_FISH) return
   // Anglerfish only appear in deep water; normal fish appear at all depths
   const isAngler = t > 0.65 && Math.random() < 0.35
   const goRight = Math.random() > 0.3
@@ -342,6 +346,7 @@ function spawnFish(container: HTMLElement, t: number) {
     transformOrigin: 'center center',
     willChange: 'left, top',
   })
+  el.className = 'fish'
   container.appendChild(el)
 
   let x = goRight ? -offscreen : window.innerWidth + offscreen
@@ -449,14 +454,21 @@ export function Underwater() {
     }
     window.addEventListener('resize', onResize)
 
-    let timer: ReturnType<typeof setTimeout>
+    // Timers keep firing in a hidden tab but animation frames pause, so fish would pile up at the edge and
+    // swim in as a horde on return. Spawning stops while the tab is hidden and resumes when it's visible.
+    let timer: ReturnType<typeof setTimeout> | undefined
     const schedule = () => {
       timer = setTimeout(() => {
         if (containerRef.current) spawnFish(containerRef.current, computeT())
         schedule()
       }, 700 + Math.random() * 2200)
     }
-    schedule()
+    const onVisibility = () => {
+      clearTimeout(timer)
+      if (!document.hidden) schedule()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    if (!document.hidden) schedule()
 
     return () => {
       window.removeEventListener('scroll', onScroll)
@@ -464,6 +476,7 @@ export function Underwater() {
       clearTimeout(resizeTimer)
       cancelAnimationFrame(raf)
       clearTimeout(timer)
+      document.removeEventListener('visibilitychange', onVisibility)
       coral?.shallow.remove()
       coral?.deep.remove()
       for (const k of Object.keys(PALETTE)) {
