@@ -51,7 +51,7 @@ export const mdxComponents = {
       {...props}
       style={{
         fontSize: '17px',
-        lineHeight: 1.85,
+        lineHeight: 1.65,
         marginTop: '1.1rem',
         marginBottom: '1.1rem',
         color: 'var(--color-ink)',
@@ -107,7 +107,8 @@ export const mdxComponents = {
       style={{
         borderLeft: '2px solid var(--color-border)',
         paddingLeft: '1.25rem',
-        margin: '1.5rem 0',
+        marginTop: '1.5rem',
+        marginBottom: '1.5rem',
         fontStyle: 'italic',
         color: 'var(--color-muted)',
       }}
@@ -117,12 +118,12 @@ export const mdxComponents = {
     <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '2.5rem 0' }} />
   ),
   ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul {...props} style={{ listStyle: 'disc', paddingLeft: '1.25rem', margin: '1rem 0' }} />
+    <ul {...props} style={{ listStyle: 'disc', paddingLeft: '1.25rem', marginTop: '1rem', marginBottom: '1rem' }} />
   ),
   ol: (props: React.OlHTMLAttributes<HTMLOListElement>) => (
-    <ol {...props} style={{ listStyle: 'decimal', paddingLeft: '1.25rem', margin: '1rem 0' }} />
+    <ol {...props} style={{ listStyle: 'decimal', paddingLeft: '1.25rem', marginTop: '1rem', marginBottom: '1rem' }} />
   ),
   li: (props: React.LiHTMLAttributes<HTMLLIElement>) => (
-    <li {...props} style={{ fontSize: '17px', lineHeight: 1.75, marginBottom: '0.35rem', color: 'var(--color-ink)' }} />
+    <li {...props} style={{ fontSize: '17px', lineHeight: 1.65, marginBottom: '0.35rem', color: 'var(--color-ink)' }} />
   ),
 }

@@ -643,6 +643,14 @@ button.bracket-link {
     0 12px 40px rgba(7, 16, 36, 0.14);
 }
 
+/* Prose keeps a ~70-character measure (60ch of this serif), centred; figures and the plan tree use the full panel width */
+.reading-panel .reading-measure,
+.reading-panel article > :is(p, h1, h2, h3, h4, ul, ol, blockquote, pre) {
+  max-width: 60ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .reading-panel ::selection {
   background-color: rgba(85, 152, 215, 0.25);
   color: inherit;
