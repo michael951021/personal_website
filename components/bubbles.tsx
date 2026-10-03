@@ -1,32 +1,28 @@
 'use client'
 
-// Bubbles that rise from an element (a skill name, a project title) when its container is hovered.
-// The container must be position:relative; bubbles are appended to it and remove themselves.
+import { useEffect } from 'react'
 
-export function spawnBubbles(li: HTMLElement, sourceSelector: string) {
-  const nameEl = li.querySelector(sourceSelector) as HTMLElement | null
-  if (!nameEl) return
+// Bubbles that rise from an element when it's hovered. The count scales with the element's width,
+// so a small icon button lets out a couple and a wide title lets out more. Bubbles are fixed-position
+// children of <body> and remove themselves.
 
-  const liRect   = li.getBoundingClientRect()
-  const nameRect = nameEl.getBoundingClientRect()
-  const nameTopInLi  = nameRect.top  - liRect.top
-  const nameLeftInLi = nameRect.left - liRect.left
-  const riseDistance = nameRect.top + 40
+export function spawnBubbles(el: HTMLElement, minCount = 2) {
+  const rect = el.getBoundingClientRect()
+  const riseDistance = rect.top + 40
   const duration = 1.4 + Math.random() * 0.6
-  const count    = 5 + Math.floor(Math.random() * 3)
+  const count = Math.max(minCount, Math.min(8, Math.round(rect.width / 28)))
 
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
       const b = document.createElement('span')
-      const xOffset = (Math.random() - 0.5) * nameRect.width * 0.9
-      const x    = nameLeftInLi + nameRect.width / 2 + xOffset
+      const x = rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width * 0.9
       const size = 3 + Math.random() * 3
       const drift = (Math.random() - 0.5) * 24
 
       Object.assign(b.style, {
-        position:        'absolute',
+        position:        'fixed',
         left:            x + 'px',
-        top:             (nameTopInLi + nameRect.height / 2) + 'px',
+        top:             (rect.top + rect.height / 2) + 'px',
         width:           size + 'px',
         height:          size + 'px',
         borderRadius:    '50%',
@@ -34,12 +30,14 @@ export function spawnBubbles(li: HTMLElement, sourceSelector: string) {
         backgroundColor: 'rgba(150,200,255,0.06)',
         opacity:         '0.65',
         pointerEvents:   'none',
+        zIndex:          '2',
         willChange:      'transform, opacity',
         transform:       'translate(0, 0)',
       })
 
-      li.appendChild(b)
+      document.body.appendChild(b)
 
+      // Double rAF so the start state paints before the transition begins
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           b.style.transition = `transform ${duration}s ease-out, opacity ${duration * 0.9}s ease-in`
@@ -53,14 +51,18 @@ export function spawnBubbles(li: HTMLElement, sourceSelector: string) {
   }
 }
 
-export function BubbleZone({ source, className, children }: {
-  source: string // selector, within this zone, for the element the bubbles rise from
-  className?: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className={className} style={{ position: 'relative' }} onMouseEnter={e => spawnBubbles(e.currentTarget, source)}>
-      {children}
-    </div>
-  )
+// Mounted once in the layout: any element with a data-bubbles attribute bubbles when the pointer enters it,
+// so server components only need the attribute.
+export function HoverBubbles() {
+  useEffect(() => {
+    const onOver = (e: MouseEvent) => {
+      const el = (e.target as Element | null)?.closest<HTMLElement>('[data-bubbles]')
+      // mouseover also fires when moving between an element's children; only count real entries
+      if (!el || el.contains(e.relatedTarget as Node | null)) return
+      spawnBubbles(el)
+    }
+    document.addEventListener('mouseover', onOver)
+    return () => document.removeEventListener('mouseover', onOver)
+  }, [])
+  return null
 }

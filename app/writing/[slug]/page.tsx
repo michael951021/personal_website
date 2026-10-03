@@ -86,7 +86,7 @@ export default async function PostPage({
 
           {data.url && (
             <div style={{ marginBottom: '1.5rem' }}>
-              <a href={data.url} target="_blank" rel="noopener noreferrer" className="button">
+              <a href={data.url} target="_blank" rel="noopener noreferrer" className="button" data-bubbles>
                 Check it out →
               </a>
             </div>

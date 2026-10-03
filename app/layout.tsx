@@ -3,6 +3,7 @@ import { Newsreader, JetBrains_Mono } from 'next/font/google'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
 import { Underwater } from '@/components/underwater'
+import { HoverBubbles } from '@/components/bubbles'
 import { site } from '@/lib/config'
 import './globals.css'
 
@@ -50,6 +51,7 @@ export default function RootLayout({
       <body>
         {/* Fixed background layers: fish + rays, painted below content */}
         <Underwater />
+        <HoverBubbles />
         <div id="water-rays" />
 
         {/* Content — position:relative + z-index:1 creates a stacking context

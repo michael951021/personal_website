@@ -23,6 +23,7 @@ export function SocialLinks() {
           aria-label={l.label}
           title={l.label}
           className={`social-button ${l.className}`}
+          data-bubbles
         >
           <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
             <path d={l.path} fill="currentColor" />

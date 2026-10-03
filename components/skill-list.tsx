@@ -51,8 +51,13 @@ function SkillRow({ skill, open, place, onToggle, onPlace }: {
 }) {
   const id = `skill-${skill.name.replace(/\W+/g, '-').toLowerCase()}`
   const others = (skill.where ?? []).filter(p => p !== place)
+  const bubbleFromName = (e: React.MouseEvent<HTMLLIElement>) => {
+    const name = e.currentTarget.querySelector<HTMLElement>('.skill-name')
+    // Rows are wide targets even when the name is short, so they keep a fuller burst
+    if (name) spawnBubbles(name, 5)
+  }
   return (
-    <li className="skill-row" data-open={open} onMouseEnter={e => spawnBubbles(e.currentTarget, '.skill-name')}>
+    <li className="skill-row" data-open={open} onMouseEnter={bubbleFromName}>
       <button type="button" className="skill-head" aria-expanded={open} aria-controls={id} onClick={onToggle}>
         <FishBullet />
         <span className="skill-name">{skill.name}</span>

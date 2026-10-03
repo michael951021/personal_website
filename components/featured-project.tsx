@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { BubbleZone } from '@/components/bubbles'
 import { current } from '@/lib/config'
 import loop from '@/content/writing/data/local-multi-agent-loop.json'
 
@@ -13,11 +12,11 @@ const facts = [
 
 export function FeaturedProject() {
   return (
-    <BubbleZone className="featured" source=".featured-title">
+    <div className="featured">
       <p className="featured-label">Currently working on</p>
 
       <h2 style={{ margin: 0 }}>
-        <Link href={current.href} className="featured-title">
+        <Link href={current.href} className="featured-title" data-bubbles>
           {current.title}
         </Link>
       </h2>
@@ -29,13 +28,13 @@ export function FeaturedProject() {
       <p className="featured-facts">{facts.join(' · ')}</p>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem 1rem' }}>
-        <Link href={current.href} className="button">
+        <Link href={current.href} className="button" data-bubbles>
           Read the report →
         </Link>
-        <a href={current.runUrl} target="_blank" rel="noopener noreferrer" className="button">
+        <a href={current.runUrl} target="_blank" rel="noopener noreferrer" className="button" data-bubbles>
           See a run ↗
         </a>
       </div>
-    </BubbleZone>
+    </div>
   )
 }

@@ -27,6 +27,7 @@ export function DeepLink({ href, children }: { href: string; children: React.Rea
     <Link
       href={href}
       className="deep-link"
+      data-bubbles
       style={{ '--glow': glow } as React.CSSProperties}
       aria-hidden={glow === 0 ? true : undefined}
       tabIndex={glow === 0 ? -1 : undefined}
