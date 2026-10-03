@@ -1,5 +1,6 @@
 export const site = {
   name: 'Kevin Rodriguez',
+  url: 'https://personal-website-theta-red-60.vercel.app',
   email: 'kjr64@cornell.edu',
   role: 'Software Engineer',
   location: 'Ithaca, NY',

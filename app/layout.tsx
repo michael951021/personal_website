@@ -23,6 +23,8 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  // Absolute base for the link-preview image (app/opengraph-image.png)
+  metadataBase: new URL(site.url),
   title: {
     default: site.name,
     template: `%s — ${site.name}`,
