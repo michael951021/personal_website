@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BubbleZone } from '@/components/bubbles'
 import { current } from '@/lib/config'
 import loop from '@/content/writing/data/local-multi-agent-loop.json'
 
@@ -12,7 +13,7 @@ const facts = [
 
 export function FeaturedProject() {
   return (
-    <div className="featured">
+    <BubbleZone className="featured" source=".featured-title">
       <p className="featured-label">Currently working on</p>
 
       <h2 style={{ margin: 0 }}>
@@ -35,6 +36,6 @@ export function FeaturedProject() {
           See a run ↗
         </a>
       </div>
-    </div>
+    </BubbleZone>
   )
 }
