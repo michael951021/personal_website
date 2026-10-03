@@ -54,7 +54,7 @@ export default async function PostPage({
 
         {/* Fixed light palette for reading; the ocean stays visible around it */}
         <div className="reading-panel">
-          <header className="reading-measure" style={{ marginBottom: '2rem' }}>
+          <header style={{ marginBottom: '2rem' }}>
             <h1
               style={{
                 fontFamily: 'var(--font-serif)',
@@ -85,14 +85,14 @@ export default async function PostPage({
           </header>
 
           {data.url && (
-            <div className="reading-measure" style={{ marginBottom: '1.5rem' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
               <a href={data.url} target="_blank" rel="noopener noreferrer" className="button">
                 Check it out →
               </a>
             </div>
           )}
 
-          <hr className="reading-measure" style={{ border: 'none', borderTop: '1px solid var(--color-muted)', marginBottom: '2rem' }} />
+          <hr style={{ border: 'none', borderTop: '1px solid var(--color-muted)', marginBottom: '2rem' }} />
 
           <article>
             <MDXRemote source={content} components={{ ...mdxComponents, ...writingComponents }} />
