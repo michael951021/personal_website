@@ -45,7 +45,7 @@ export function Figure({ caption, children, controls }: { caption: ReactNode; ch
       {controls && <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>{controls}</div>}
       {children}
       <figcaption
-        style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', lineHeight: 1.6, color: 'var(--color-muted)', marginTop: '0.6rem' }}
+        style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', lineHeight: 1.6, color: 'var(--color-muted)', marginTop: '0.6rem' }}
       >
         {caption}
       </figcaption>
@@ -61,7 +61,7 @@ export function Toggle({ active, onClick, children }: { active: boolean; onClick
       aria-pressed={active}
       style={{
         fontFamily: 'var(--font-mono)',
-        fontSize: '10.5px',
+        fontSize: 'var(--text-xs)',
         letterSpacing: '0.05em',
         textTransform: 'uppercase',
         padding: '0.3em 0.7em',
@@ -82,7 +82,7 @@ export function Legend({ items }: { items: { name: string; color: string }[] }) 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem 1rem', marginTop: '0.5rem' }}>
       {items.map(i => (
-        <span key={i.name} style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-muted)' }}>
+        <span key={i.name} style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--color-muted)' }}>
           <span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 2, background: i.color, marginRight: 6 }} />
           {i.name}
         </span>
@@ -110,7 +110,7 @@ export function Tip({ x, y, width, children }: { x: number; y: number; width: nu
         borderRadius: '3px',
         padding: '0.45rem 0.6rem',
         fontFamily: 'var(--font-mono)',
-        fontSize: '11px',
+        fontSize: 'var(--text-xs)',
         lineHeight: 1.55,
         boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
         minWidth: 150,

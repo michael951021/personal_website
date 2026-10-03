@@ -39,7 +39,7 @@ export default async function PostPage({
           href="/writing"
           style={{
             fontFamily: 'var(--font-mono)',
-            fontSize: '11px',
+            fontSize: 'var(--text-xs)',
             letterSpacing: '0.06em',
             color: 'var(--color-muted)',
             textDecoration: 'none',
@@ -74,7 +74,7 @@ export default async function PostPage({
                 flexWrap: 'wrap',
                 gap: '0.5rem 1.25rem',
                 fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
+                fontSize: 'var(--text-xs)',
                 letterSpacing: '0.07em',
                 textTransform: 'uppercase',
                 color: 'var(--color-muted)',

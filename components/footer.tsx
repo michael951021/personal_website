@@ -14,7 +14,7 @@ export function Footer() {
         className="flex items-center justify-between"
         style={{
           fontFamily: 'var(--font-mono)',
-          fontSize: '11px',
+          fontSize: 'var(--text-xs)',
           letterSpacing: '0.06em',
           color: 'var(--color-muted)',
         }}

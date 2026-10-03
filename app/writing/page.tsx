@@ -38,7 +38,7 @@ export default function Writing() {
                   <span
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      fontSize: '11px',
+                      fontSize: 'var(--text-xs)',
                       color: 'var(--color-muted)',
                       letterSpacing: '0.04em',
                       flexShrink: 0,

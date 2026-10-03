@@ -44,7 +44,7 @@ export default function About() {
           <p
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
+              fontSize: 'var(--text-xs)',
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
               color: 'var(--color-muted)',
@@ -73,7 +73,7 @@ export default function About() {
                 <dt
                   style={{
                     fontFamily: 'var(--font-mono)',
-                    fontSize: '11px',
+                    fontSize: 'var(--text-xs)',
                     letterSpacing: '0.06em',
                     color: 'var(--color-muted)',
                     paddingTop: '0.1rem',
@@ -97,7 +97,7 @@ export default function About() {
           <p
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
+              fontSize: 'var(--text-xs)',
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
               color: 'var(--color-muted)',

@@ -43,7 +43,7 @@ export default function Home() {
                 <p
                   style={{
                     fontFamily: 'var(--font-mono)',
-                    fontSize: '11px',
+                    fontSize: 'var(--text-xs)',
                     letterSpacing: '0.08em',
                     color: 'var(--color-muted)',
                     marginTop: '1.25rem',

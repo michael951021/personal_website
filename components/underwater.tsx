@@ -8,68 +8,59 @@ const lerp = (a: number, b: number, t: number) => Math.round(a + (b - a) * t)
 
 const PALETTE: Record<string, { s: [number, number, number]; e: [number, number, number] }> = {
   'color-bg': { s: [199, 222, 240], e: [7, 16, 36] },
-  'color-ink': { s: [32, 44, 58], e: [208, 228, 250] },
-  'color-muted': { s: [116, 136, 154], e: [120, 180, 245] },
+  'color-ink': { s: [26, 36, 48], e: [208, 228, 250] },
+  'color-muted': { s: [70, 88, 106], e: [130, 186, 248] },
   'color-border': { s: [214, 226, 235], e: [16, 40, 75] },
   'color-surface': { s: [226, 235, 242], e: [10, 24, 48] },
 }
 
+// WCAG relative luminance of an sRGB colour
+function luminance([r, g, b]: [number, number, number]) {
+  const f = (v: number) => {
+    v /= 255
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+  }
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+}
+
+// Text endpoints. Ink and muted both run toward near-black / near-white as the background approaches the
+// mid-tone where the light/dark switch happens, so muted text holds ≥4.5:1 over ~97% of the scroll
+// (the dip at the switch itself is ~4.3:1; even pure black only reaches ~4.6:1 there).
+const TEXT = {
+  inkTop: [26, 36, 48], mutedTop: [70, 88, 106], nearBlack: [0, 4, 10],
+  inkBottom: [208, 228, 250], mutedBottom: [130, 186, 248], nearWhite: [244, 248, 253],
+} as const
+const SWITCH_AVG = 120 // average channel value of the background at the switch
+const mix = (a: readonly number[], b: readonly number[], u: number) =>
+  `rgb(${lerp(a[0], b[0], u)},${lerp(a[1], b[1], u)},${lerp(a[2], b[2], u)})`
+
 function applyDepth(t: number) {
   const root = document.documentElement
 
-  // Shared helpers reused by ink / muted / border branches
   const bgS = PALETTE['color-bg'].s
   const bgE = PALETTE['color-bg'].e
-  const avgBg = (lerp(bgS[0], bgE[0], t) + lerp(bgS[1], bgE[1], t) + lerp(bgS[2], bgE[2], t)) / 3
-  // "Sticky" interpolation factor — plateaus in the mid-range so each mode's
-  // colours stay close to their endpoint values for maximum readability.
-  const temp = t < 0.2 ? t : t < 0.6 ? 0.2 : t < 0.8 ? 0.2 + (t - 0.6) * 1.5 : 1
-  const lightMode = avgBg > 128
+  const bg: [number, number, number] = [lerp(bgS[0], bgE[0], t), lerp(bgS[1], bgE[1], t), lerp(bgS[2], bgE[2], t)]
+  const avgBg = (bg[0] + bg[1] + bg[2]) / 3
+  // Dark text while it out-contrasts white text on this background
+  const L = luminance(bg)
+  const lightMode = (L + 0.05) / 0.05 >= 1.05 / (L + 0.05)
 
-  for (const [k, { s, e }] of Object.entries(PALETTE)) {
+  if (lightMode) {
+    // u: 0 at the switch → 1 at the page top
+    const u = Math.max(0, Math.min(1, (avgBg - SWITCH_AVG) / (220 - SWITCH_AVG)))
+    root.style.setProperty('--color-ink', mix(TEXT.nearBlack, TEXT.inkTop, u))
+    root.style.setProperty('--color-muted', mix(TEXT.nearBlack, TEXT.mutedTop, u))
+  } else {
+    // u: 1 at the switch → 0 at the page bottom
+    const u = Math.max(0, Math.min(1, (avgBg - 20) / (SWITCH_AVG - 20)))
+    root.style.setProperty('--color-ink', mix(TEXT.inkBottom, TEXT.nearWhite, u))
+    root.style.setProperty('--color-muted', mix(TEXT.mutedBottom, TEXT.nearWhite, u))
+  }
 
-    // ── ink: near-black on light bg / near-white on dark bg ─────────────
-    if (k === 'color-ink') {
-      const ink_delta = 20
-      if (lightMode) {
-        root.style.setProperty(`--${k}`,
-          `rgb(${lerp(s[0], s[0] + ink_delta, temp)},${lerp(s[1], s[1] + ink_delta, temp)},${lerp(s[2], s[2] + ink_delta, temp)})`)
-      } else {
-        root.style.setProperty(`--${k}`,
-          `rgb(${lerp(e[0], e[0] - ink_delta, temp)},${lerp(e[1], e[1] - ink_delta, temp)},${lerp(e[2], e[2] + ink_delta, temp)})`)
-      }
-      continue
-    }
-
-    // ── muted: contrast-guaranteed, CSS-transitioned ────────────────────────
-    // Within each mode the value is driven directly from avgBg so it always
-    // has readable contrast against the current background:
-    //   light mode: lerp floor[32,44,56] → s  as avgBg rises 128→220
-    //   dark  mode: lerp e               → ceil[220,232,244] as avgBg rises 20→128
-    // The 250ms CSS @property transition (globals.css) cross-fades the jump
-    // at the avgBg=128 threshold so it fades instead of snapping.
-    if (k === 'color-muted') {
-      const floor: [number, number, number] = [32, 44, 56]    // dark — 3.4:1 at threshold bg
-      const ceil:  [number, number, number] = [220, 232, 244] // light — 3.3:1 at threshold bg
-      if (lightMode) {
-        // tScale 0 at avgBg=128 (threshold) → 1 at avgBg≈220 (page top)
-        const tScale = Math.max(0, Math.min(1, (avgBg - 128) / (220 - 128)))
-        root.style.setProperty(`--${k}`,
-          `rgb(${lerp(floor[0], s[0], tScale)},${lerp(floor[1], s[1], tScale)},${lerp(floor[2], s[2], tScale)})`)
-      } else {
-        // tScale 1 at avgBg=128 (threshold) → 0 at avgBg≈20 (page bottom)
-        const tScale = Math.max(0, Math.min(1, (avgBg - 20) / (128 - 20)))
-        root.style.setProperty(`--${k}`,
-          `rgb(${lerp(e[0], ceil[0], tScale)},${lerp(e[1], ceil[1], tScale)},${lerp(e[2], ceil[2], tScale)})`)
-      }
-      continue
-    }
-
-    // ── everything else (bg, border, surface): simple linear interpolation
-    root.style.setProperty(
-      `--${k}`,
-      `rgb(${lerp(s[0], e[0], t)},${lerp(s[1], e[1], t)},${lerp(s[2], e[2], t)})`
-    )
+  // Background, border and surface: simple linear interpolation
+  for (const k of ['color-bg', 'color-border', 'color-surface']) {
+    const { s, e } = PALETTE[k]
+    root.style.setProperty(`--${k}`, `rgb(${lerp(s[0], e[0], t)},${lerp(s[1], e[1], t)},${lerp(s[2], e[2], t)})`)
   }
 }
 
