@@ -62,8 +62,7 @@ export function Toggle({ active, onClick, children }: { active: boolean; onClick
       style={{
         fontFamily: 'var(--font-mono)',
         fontSize: 'var(--text-xs)',
-        letterSpacing: '0.05em',
-        textTransform: 'uppercase',
+        letterSpacing: '0.02em',
         padding: '0.3em 0.7em',
         borderRadius: '2px',
         cursor: 'pointer',

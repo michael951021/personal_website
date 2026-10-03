@@ -41,18 +41,7 @@ export default function About() {
 
         {/* Background */}
         <div style={{ marginBottom: '3rem' }}>
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 'var(--text-xs)',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: 'var(--color-muted)',
-              marginBottom: '1rem',
-            }}
-          >
-            Background
-          </p>
+          <h2 className="section-title">Background</h2>
           <dl style={{ margin: 0 }}>
             {[
               { label: 'Education', value: 'B.S. Computer Science, Cornell University, 2026' },
@@ -72,16 +61,13 @@ export default function About() {
               >
                 <dt
                   style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 'var(--text-xs)',
-                    letterSpacing: '0.06em',
+                    fontSize: 'var(--text-base)',
                     color: 'var(--color-muted)',
-                    paddingTop: '0.1rem',
                   }}
                 >
                   {label}
                 </dt>
-                <dd style={{ fontSize: '15px', margin: 0, color: 'var(--color-ink)' }}>
+                <dd style={{ fontSize: 'var(--text-base)', margin: 0, color: 'var(--color-ink)' }}>
                   {value}
                 </dd>
               </div>
@@ -94,19 +80,8 @@ export default function About() {
 
         {/* Contact */}
         <div>
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 'var(--text-xs)',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: 'var(--color-muted)',
-              marginBottom: '1rem',
-            }}
-          >
-            Contact
-          </p>
-          <p style={{ fontSize: '15px', lineHeight: 1.7, color: 'var(--color-ink)' }}>
+          <h2 className="section-title">Contact</h2>
+          <p style={{ fontSize: 'var(--text-base)', lineHeight: 1.7, color: 'var(--color-ink)' }}>
             <a href={`mailto:${site.email}`} className="link-underline">
               {site.email}
             </a>

@@ -75,8 +75,7 @@ export default async function PostPage({
                 gap: '0.5rem 1.25rem',
                 fontFamily: 'var(--font-mono)',
                 fontSize: 'var(--text-xs)',
-                letterSpacing: '0.07em',
-                textTransform: 'uppercase',
+                letterSpacing: '0.02em',
                 color: 'var(--color-muted)',
               }}
             >
