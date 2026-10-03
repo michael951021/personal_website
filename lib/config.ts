@@ -19,6 +19,6 @@ export const current = {
   summary:
     'Two Qwen 27B agents sharing a pair of 3090s, working through a ~140-task plan to find, reproduce and fix bugs in ' +
     'open-source ML repos. The interesting part is everything around the model: a task tree so each step knows where it ' +
-    'sits, short handoff notes when an agent stops, and a llama-server setup that keeps the prompt cache warm. The ' +
-    'second agent bought about 20% more throughput.',
+    'sits, short handoff notes when an agent stops, and a move to llama-server that took prompt-cache reuse from 7% ' +
+    'to 97%. A second agent on the same GPUs bought about 20% more throughput.',
 }

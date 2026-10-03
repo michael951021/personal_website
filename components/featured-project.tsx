@@ -2,39 +2,30 @@ import Link from 'next/link'
 import { current } from '@/lib/config'
 import loop from '@/content/writing/data/local-multi-agent-loop.json'
 
-// Headline numbers come from the report's own data export, so they stay in sync when it's refreshed.
-const { totals, reuse_by_era: reuse } = loop
-const stats = [
-  { value: String(totals.runs), label: 'agent runs' },
-  { value: `${Math.round(totals.agent_hours)} h`, label: 'of agent time' },
-  { value: `${(totals.gen_tok / 1e6).toFixed(1)}M`, label: 'tokens generated' },
-  { value: `${Math.round(reuse.ollama)}% → ${Math.round(reuse.llama)}%`, label: 'prompt-cache reuse' },
+// Supporting figures come from the report's own data export, so they stay in sync when it's refreshed.
+const { totals } = loop
+const facts = [
+  `${totals.runs} runs`,
+  `${Math.round(totals.agent_hours)} agent-hours`,
+  `${(totals.gen_tok / 1e6).toFixed(1)}M tokens generated`,
 ]
 
 export function FeaturedProject() {
   return (
-    <div className="featured-card">
-      <p className="featured-label">
-        <span className="live-dot" aria-hidden="true" />
-        Currently working on
-      </p>
+    <div className="featured">
+      <p className="featured-label">Currently working on</p>
 
-      <Link href={current.href} className="featured-title">
-        {current.title}
-      </Link>
+      <h2 style={{ margin: 0 }}>
+        <Link href={current.href} className="featured-title">
+          {current.title}
+        </Link>
+      </h2>
 
-      <p style={{ fontSize: '16px', lineHeight: 1.75, color: 'var(--color-ink)', margin: '0.6rem 0 1.25rem', maxWidth: '600px' }}>
+      <p style={{ fontSize: 'var(--text-base)', lineHeight: 1.7, color: 'var(--color-ink)', margin: '0.75rem 0 0.9rem', maxWidth: '620px' }}>
         {current.summary}
       </p>
 
-      <dl className="featured-stats">
-        {stats.map(s => (
-          <div key={s.label}>
-            <dt>{s.label}</dt>
-            <dd>{s.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <p className="featured-facts">{facts.join(' · ')}</p>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem 1rem' }}>
         <Link href={current.href} className="check-out-link">
