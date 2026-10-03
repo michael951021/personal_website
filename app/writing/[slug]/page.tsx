@@ -86,7 +86,7 @@ export default async function PostPage({
 
           {data.url && (
             <div className="reading-measure" style={{ marginBottom: '1.5rem' }}>
-              <a href={data.url} target="_blank" rel="noopener noreferrer" className="check-out-link">
+              <a href={data.url} target="_blank" rel="noopener noreferrer" className="button">
                 Check it out →
               </a>
             </div>

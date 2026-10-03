@@ -250,12 +250,37 @@
   text-decoration-color: var(--color-ink);
 }
 
-.link-fade {
-  transition: opacity 150ms ease;
+
+
+/* Buttons that are text links: same look as .link-underline */
+button.link-underline {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
-.link-fade:hover {
-  opacity: 0.55;
+/* The one button style: a quiet outlined pill that fills with ink on hover */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  line-height: 1;
+  color: var(--color-ink);
+  border: 1px solid color-mix(in srgb, var(--color-ink) 35%, transparent);
+  border-radius: 999px;
+  padding: 0.6em 1.15em;
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.button:hover {
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-bg);
 }
 
 /* ─── Tag pills ──────────────────────────────────────────────── */
@@ -271,26 +296,7 @@
   border-color: var(--color-muted);
 }
 
-.check-out-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  color: rgb(85, 152, 215);
-  border: 1px solid rgba(85, 152, 215, 0.45);
-  border-radius: 2px;
-  padding: 0.45em 0.9em;
-  text-decoration: none;
-  background-color: rgba(85, 152, 215, 0.07);
-  transition: background-color 150ms ease, border-color 150ms ease;
-}
 
-.check-out-link:hover {
-  background-color: rgba(85, 152, 215, 0.15);
-  border-color: rgba(85, 152, 215, 0.75);
-}
 
 /* ─── Portrait ───────────────────────────────────────────────── */
 
@@ -387,17 +393,7 @@
   margin: 0 0 1.5rem;
 }
 
-.bracket-link {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  color: var(--color-muted);
-  transition: color 150ms ease;
-}
 
-.bracket-link:hover {
-  color: var(--color-ink);
-}
 
 
 /* ─── Skills explorer ────────────────────────────────────────── */
@@ -557,6 +553,11 @@
   max-width: 560px;
 }
 
+.skill-links .skill-link {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
 .skill-links {
   display: flex;
   flex-wrap: wrap;
@@ -564,12 +565,6 @@
   padding-bottom: 1rem;
 }
 
-button.bracket-link {
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-}
 
 @media (max-width: 560px) {
   .skill-where { display: none; }

@@ -28,10 +28,10 @@ export function FeaturedProject() {
       <p className="featured-facts">{facts.join(' · ')}</p>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem 1rem' }}>
-        <Link href={current.href} className="check-out-link">
+        <Link href={current.href} className="button">
           Read the report →
         </Link>
-        <a href={current.runUrl} target="_blank" rel="noopener noreferrer" className="check-out-link">
+        <a href={current.runUrl} target="_blank" rel="noopener noreferrer" className="button">
           See a run ↗
         </a>
       </div>

@@ -119,13 +119,13 @@ function SkillRow({ skill, open, place, onToggle, onPlace }: {
           {(others.length > 0 || skill.posts.length > 0) && (
             <div className="skill-links">
               {others.map(p => (
-                <button key={p} type="button" className="bracket-link" onClick={() => onPlace(p)}>
-                  [more from {PLACES[p].label}]
+                <button key={p} type="button" className="link-underline skill-link" onClick={() => onPlace(p)}>
+                  More from {PLACES[p].label}
                 </button>
               ))}
               {skill.posts.map(post => (
-                <Link key={post.slug} href={`/writing/${post.slug}`} className="bracket-link">
-                  [read: {post.title}]
+                <Link key={post.slug} href={`/writing/${post.slug}`} className="link-underline skill-link">
+                  Read: {post.title}
                 </Link>
               ))}
             </div>
