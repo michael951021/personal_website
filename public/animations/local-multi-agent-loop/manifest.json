@@ -1,22 +1,22 @@
 {
   "id": "local-multi-agent-loop",
   "title": "Local multi-agent loop",
-  "description": "Two workers claim queue items, then read and write a shared database.",
+  "description": "Two workers take all four tasks in order, share results through a database, then the queue refills.",
   "source": "motion-canvas/src/scenes/queue.tsx",
   "project": "src/projects/local-multi-agent-loop",
-  "frames": 120,
+  "frames": 180,
   "fps": 20,
-  "posterFrame": 50,
+  "posterFrame": 110,
   "website": "/writing/local-multi-agent-loop",
   "tool": "Motion Canvas",
   "version": "3.17.2",
   "width": 192,
   "height": 112,
-  "durationMs": 6000,
+  "durationMs": 9000,
   "loop": true,
   "colors": 6,
   "spritesheet": {
     "columns": 12,
-    "rows": 10
+    "rows": 15
   }
 }

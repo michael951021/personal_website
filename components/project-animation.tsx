@@ -4,8 +4,8 @@ import Image from 'next/image'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 const descriptions = {
-  'local-multi-agent-loop': 'Two agents take tasks from a queue, then exchange results with a shared database.',
-  'speculative-agent-workloads': 'A drafter predicts tokens; the target checks the block, keeps the accepted prefix and corrects a rejection.',
+  'local-multi-agent-loop': 'Two agents claim all four tasks in order, share results through a database, then the queue refills.',
+  'speculative-agent-workloads': 'A drafter predicts tokens; the target checks the block, corrects a rejection and completes a green sequence beside it.',
 }
 export type AnimationId = keyof typeof descriptions
 
