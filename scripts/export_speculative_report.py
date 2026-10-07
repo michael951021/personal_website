@@ -15,6 +15,31 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def rebrand_report(page: str) -> str:
+    """Update current labels and commands while preserving recorded evidence."""
+    segments = re.split(
+        r"(<script\b[^>]*>.*?</script>|<pre\b[^>]*>.*?</pre>)", page, flags=re.S
+    )
+    renamed = []
+    for segment in segments:
+        snapshot = segment.startswith("<script") and (
+            'id="report-data"' in segment or 'id="csv-data"' in segment
+        )
+        original_diff = segment.startswith("<pre") and "<code>diff --git " in segment
+        if not snapshot and not original_diff:
+            segment = segment.replace("draftlab/", "speculative_agent_workloads/")
+            segment = segment.replace("draftlab.", "speculative_agent_workloads.")
+            segment = segment.replace("draftlab_", "speculative_agent_workloads_")
+            segment = segment.replace("draftlab-commit-", "speculative-commit-")
+            segment = segment.replace("draftlab-", "speculative-agent-workloads-")
+            segment = re.sub(
+                r"\bdraftlab\b", "Speculative Decoding for Agent Workloads",
+                segment, flags=re.I,
+            )
+        renamed.append(segment)
+    return "".join(renamed)
+
+
 def embedded_json(page: str, identifier: str):
     match = re.search(
         rf'<script\b[^>]*\bid="{identifier}"[^>]*>(.*?)</script>', page, re.S
@@ -28,12 +53,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "report", nargs="?", type=Path,
-        default=ROOT.parent / "loop/reports/draftlab-report-rewritten.html",
+        default=ROOT.parent / "loop/reports/speculative-agent-workloads-report-rewritten.html",
     )
     args = parser.parse_args()
     page = args.report.read_text(encoding="utf-8")
-    segments = re.split(r"(<script\b[^>]*>.*?</script>)", page, flags=re.S)
-    page = "".join(segment if segment.startswith("<script") and ('id="report-data"' in segment or 'id="csv-data"' in segment) else segment.replace("Draftlab", "Speculative Decoding for Agent Workloads").replace("draftlab-commit-", "speculative-commit-").replace("draftlab-evidence", "speculative-agent-workloads-evidence").replace("draftlab-metrics", "speculative-agent-workloads-metrics") for segment in segments)
+    page = rebrand_report(page)
     evidence_text, evidence = embedded_json(page, "report-data")
     _, csv_text = embedded_json(page, "csv-data")
     charts = {

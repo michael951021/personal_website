@@ -1,6 +1,10 @@
 import sources from '@/content/writing/data/speculative-sources.json'
 import { SpeculativeTable, smallStyle } from './speculative-table'
 
+function currentPath(path: string) {
+  return path.replace(/^draftlab\//, 'speculative_agent_workloads/')
+}
+
 export function SpeculativeArchitecture() {
   return <SpeculativeTable label="Speculative decoding architecture" headers={['Stage', 'What it does']} rows={[
     ['Collect', 'Classify agent traces, separate fenced code, remove duplicates, tokenize, and split by run.'],
@@ -37,16 +41,17 @@ export function SpeculativeSources() {
       <details style={{ margin: '1.5rem 0' }}>
         <summary style={{ cursor: 'pointer' }}>Source files and hashes</summary>
         <SpeculativeTable label="Speculative decoding source manifest" headers={['Project-relative path', 'Used for', 'SHA-256 prefix']} rows={sources.sources.map(s => [
-          <span key={s.path} style={{ overflowWrap: 'anywhere' }}>{s.path}</span>, s.purpose, <span key={s.sha256} title={s.sha256}>{s.sha256.slice(0, 12)}</span>,
+          <span key={s.path} style={{ overflowWrap: 'anywhere' }}>{currentPath(s.path)}</span>, s.purpose, <span key={s.sha256} title={s.sha256}>{s.sha256.slice(0, 12)}</span>,
         ])} />
-        <p style={smallStyle}>The evidence JSON has full hashes. Only aggregate columns were read to count the local held-out corpus.</p>
+        <p style={smallStyle}>Paths use the current package name. Hashes refer to the saved snapshot; the evidence JSON retains its original paths and full hashes. Only aggregate columns were read to count the local held-out corpus.</p>
       </details>
       <details style={{ margin: '1.5rem 0' }}>
         <summary style={{ cursor: 'pointer' }}>Code and test diffs</summary>
+        <p style={smallStyle}>These diffs preserve the original paths and implementation at each recorded commit.</p>
         {Object.entries(sources.commits).map(([name, commit]) => (
           <details key={name} id={`speculative-commit-${name}`} style={{ margin: '1rem 0' }}>
             <summary style={{ cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)' }}>{commit.short}: {commit.subject}</summary>
-            <p style={{ ...smallStyle, overflowWrap: 'anywhere' }}>{commit.date} · {commit.paths.join(', ')}</p>
+            <p style={{ ...smallStyle, overflowWrap: 'anywhere' }}>{commit.date} · {commit.paths.map(currentPath).join(', ')}</p>
             <pre style={{ padding: '1rem', border: '1px solid var(--color-border)', background: 'var(--color-surface)', overflowX: 'auto', maxHeight: 420, fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', lineHeight: 1.6 }}><code>{commit.diff}</code></pre>
           </details>
         ))}
