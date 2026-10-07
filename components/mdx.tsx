@@ -76,6 +76,7 @@ export const mdxComponents = {
       style={{
         fontFamily: 'var(--font-mono)',
         fontSize: '13.5px',
+        overflowWrap: 'anywhere',
         backgroundColor: 'var(--color-surface)',
         padding: '0.15em 0.4em',
         borderRadius: '2px',
