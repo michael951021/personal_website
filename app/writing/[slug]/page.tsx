@@ -5,6 +5,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import { getPost, getAllPosts, formatDate } from '@/lib/posts'
 import { mdxComponents } from '@/components/mdx'
 import { writingComponents } from '@/components/writing'
+import { ProjectAnimation, type AnimationId } from '@/components/project-animation'
 
 export async function generateStaticParams() {
   return getAllPosts().map(p => ({ slug: p.slug }))
@@ -82,6 +83,11 @@ export default async function PostPage({
               <span>{formatDate(data.date)}</span>
               {data.tags?.map(tag => <span key={tag}>· {tag}</span>)}
             </div>
+            {['local-multi-agent-loop', 'speculative-agent-workloads'].includes(slug) && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+                <ProjectAnimation scene={slug as AnimationId} />
+              </div>
+            )}
           </header>
 
           {data.url && (

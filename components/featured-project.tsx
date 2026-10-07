@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { current } from '@/lib/config'
 import loop from '@/content/writing/data/local-multi-agent-loop.json'
+import { ProjectAnimation } from '@/components/project-animation'
 
 // Supporting figures come from the report's own data export, so they stay in sync when it's refreshed.
 const { totals } = loop
@@ -12,7 +13,9 @@ const facts = [
 
 export function FeaturedProject() {
   return (
-    <div className="featured">
+    <>
+    <div className="featured project-feature">
+      <div>
       <p className="featured-label">Currently working on</p>
 
       <h2 style={{ margin: 0 }}>
@@ -35,6 +38,24 @@ export function FeaturedProject() {
           See a run ↗
         </a>
       </div>
+      </div>
+      <ProjectAnimation scene="local-multi-agent-loop" compact />
     </div>
+    <div className="featured project-feature" style={{ marginTop: '2.5rem' }}>
+      <div>
+        <p className="featured-label">Recent experiment</p>
+        <h2 style={{ margin: 0 }}>
+          <Link href="/writing/speculative-agent-workloads" className="featured-title" data-bubbles>
+            Speculative Decoding for Agent Workloads
+          </Link>
+        </h2>
+        <p style={{ fontSize: 'var(--text-base)', lineHeight: 1.7, margin: '0.75rem 0 1rem' }}>
+          Smaller models draft agent output; a target checks each block. Held-out prediction tests and a corrected decoder, with the speed comparison still pending.
+        </p>
+        <Link href="/writing/speculative-agent-workloads" className="button" data-bubbles>Read the report →</Link>
+      </div>
+      <ProjectAnimation scene="speculative-agent-workloads" compact />
+    </div>
+    </>
   )
 }

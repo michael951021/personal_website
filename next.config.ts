@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   // Work write-ups now live under /writing; keep old links working.
   async redirects() {
     return [
+      { source: '/writing/draftlab/:path*', destination: '/writing/speculative-agent-workloads/:path*', permanent: true },
+      { source: '/work/draftlab/:path*', destination: '/writing/speculative-agent-workloads/:path*', permanent: true },
       { source: '/work', destination: '/writing', permanent: true },
       { source: '/work/:slug', destination: '/writing/:slug', permanent: true },
     ]

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAllPosts, formatDate } from '@/lib/posts'
+import { ProjectAnimation, type AnimationId } from '@/components/project-animation'
 
 export const metadata: Metadata = {
   title: 'Writing',
@@ -22,13 +23,13 @@ export default function Writing() {
 
         <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {posts.map(post => (
-            <li key={post.slug} style={{ borderTop: '1px solid var(--color-muted)' }}>
+            <li key={post.slug} className="writing-project" style={{ borderTop: '1px solid var(--color-muted)' }}>
               <Link
                 href={`/writing/${post.slug}`}
-                style={{ display: 'block', padding: '1.4rem 0', textDecoration: 'none' }}
+                style={{ display: 'block', flex: 1, minWidth: 0, padding: '1.4rem 0', textDecoration: 'none' }}
                 className="group"
               >
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '2rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.5rem 1rem' }}>
                   <span
                     style={{ fontSize: 'var(--text-md)', color: 'var(--color-ink)', letterSpacing: '-0.01em' }}
                     className="group-hover:italic"
@@ -51,6 +52,9 @@ export default function Writing() {
                   {post.summary}
                 </p>
               </Link>
+              {['local-multi-agent-loop', 'speculative-agent-workloads'].includes(post.slug) && (
+                <ProjectAnimation scene={post.slug as AnimationId} compact />
+              )}
             </li>
           ))}
           <li style={{ borderTop: '1px solid var(--color-muted)' }} />

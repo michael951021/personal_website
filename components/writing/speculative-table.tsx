@@ -8,7 +8,7 @@ export const cellStyle: CSSProperties = {
 }
 export const smallStyle: CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', lineHeight: 1.6, color: 'var(--color-muted)' }
 
-export function DraftlabTable({ label, headers, rows }: { label: string; headers: string[]; rows: ReactNode[][] }) {
+export function SpeculativeTable({ label, headers, rows }: { label: string; headers: string[]; rows: ReactNode[][] }) {
   return (
     <div role="region" aria-label={label} tabIndex={0} style={{ overflowX: 'auto', margin: '1rem 0' }}>
       <table aria-label={label} style={{ ...tableStyle, minWidth: 520 }}>

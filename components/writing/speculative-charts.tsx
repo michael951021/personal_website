@@ -1,9 +1,9 @@
 'use client'
 
 import { useId, useState } from 'react'
-import data from '@/content/writing/data/draftlab.json'
+import data from '@/content/writing/data/speculative-agent-workloads.json'
 import { Figure, Legend, SERIES, Tip, Toggle, axisText, useWidth } from './chart-kit'
-import { DraftlabTable, cellStyle, smallStyle, tableStyle } from './draftlab-table'
+import { SpeculativeTable, cellStyle, smallStyle, tableStyle } from './speculative-table'
 
 const chartText = { ...axisText, fontSize: 12 }
 
@@ -19,7 +19,7 @@ const pct = (v: number, digits = 1) => `${(v * 100).toFixed(digits)}%`
 const count = (v: number) => v.toLocaleString('en-US')
 const selectStyle = { ...smallStyle, color: 'var(--color-ink)', background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 2, padding: '0.25rem 0.5rem' }
 
-export function DraftlabStep() {
+export function SpeculativeStep() {
   const [step, setStep] = useState(0)
   const copy = [
     'The drafter predicts three tokens and keeps the distribution that produced each one. The target checks the pending token and all three drafts in one call.',
@@ -36,7 +36,7 @@ export function DraftlabStep() {
         ))}
       </div>
       <div aria-live="polite" style={smallStyle}>{copy[step]}</div>
-      <DraftlabTable label="Example acceptance tests" headers={['Position', 'Target p(x)', 'Draft q(x)', 'Uniform u', 'u × q(x)', 'Result']} rows={[
+      <SpeculativeTable label="Example acceptance tests" headers={['Position', 'Target p(x)', 'Draft q(x)', 'Uniform u', 'u × q(x)', 'Result']} rows={[
         ['Draft 1', '0.40', '0.30', '0.60', '0.18', '0.18 < 0.40: keep'],
         ['Draft 2', '0.35', '0.40', '0.50', '0.20', '0.20 < 0.35: keep'],
         ['Draft 3', '0.12', '0.30', '0.70', '0.21', '0.21 ≥ 0.12: repair'],
@@ -45,7 +45,7 @@ export function DraftlabStep() {
   )
 }
 
-export function DraftlabCorpus() {
+export function SpeculativeCorpus() {
   const order = ['tool_result', 'thinking', 'tool_use', 'text', 'code']
   const labels: Record<string, string> = { tool_result: 'Tool results', thinking: 'Thinking', tool_use: 'Tool calls', text: 'Text', code: 'Fenced code' }
   const rows = data.corpus.by_kind.filter(r => r.split === 'train')
@@ -56,7 +56,7 @@ export function DraftlabCorpus() {
         {order.map((kind, i) => { const r = rows.find(r => r.kind === kind)!; return <div key={kind} title={`${labels[kind]}: ${count(r.tokens)} tokens (${pct(r.tokens / total)})`} style={{ width: `${r.tokens / total * 100}%`, background: SERIES[i] }} /> })}
       </div>
       <Legend items={order.map((kind, i) => ({ name: `${labels[kind]} ${pct(rows.find(r => r.kind === kind)!.tokens / total)}`, color: SERIES[i] }))} />
-      <DraftlabTable label="Corpus splits" headers={['Split', 'Runs', 'Blocks', 'Tokens']} rows={[
+      <SpeculativeTable label="Corpus splits" headers={['Split', 'Runs', 'Blocks', 'Tokens']} rows={[
         ...['train', 'val', 'test'].map(split => { const r = data.corpus.by_split.find(r => r.split === split)!; return [split, count(r.runs), count(r.blocks), count(r.tokens)] }),
         ['Temporal hold-out', count(data.heldout.runs), count(data.heldout.blocks), count(data.heldout.tokens)],
       ]} />
@@ -64,7 +64,7 @@ export function DraftlabCorpus() {
   )
 }
 
-export function DraftlabOverlap() {
+export function SpeculativeOverlap() {
   const [ref, width] = useWidth<HTMLDivElement>()
   const [hover, setHover] = useState<Drafter | null>(null)
   const left = width < 460 ? 100 : 138
@@ -91,12 +91,12 @@ export function DraftlabOverlap() {
           <div>Coverage: {pct(alpha[hover].overall.coverage)}</div>
         </Tip>}
       </div>
-      <DraftlabTable label="Overall overlap" headers={['Drafter', 'Overlap', '95% interval', 'Coverage']} rows={drafters.map(n => { const s = alpha[n].overall; return [names[n], pct(s.alpha, 2), `${pct(s.alpha_ci95[0], 2)} to ${pct(s.alpha_ci95[1], 2)}`, pct(s.coverage)] })} />
+      <SpeculativeTable label="Overall overlap" headers={['Drafter', 'Overlap', '95% interval', 'Coverage']} rows={drafters.map(n => { const s = alpha[n].overall; return [names[n], pct(s.alpha, 2), `${pct(s.alpha_ci95[0], 2)} to ${pct(s.alpha_ci95[1], 2)}`, pct(s.coverage)] })} />
     </Figure>
   )
 }
 
-export function DraftlabKinds() {
+export function SpeculativeKinds() {
   const [metric, setMetric] = useState<Metric>('alpha')
   const [drafter, setDrafter] = useState<Drafter | 'all'>('all')
   const shown = drafter === 'all' ? drafters : [drafter]
@@ -127,7 +127,7 @@ export function DraftlabKinds() {
   )
 }
 
-export function DraftlabDistill() {
+export function SpeculativeDistill() {
   const [ref, width] = useWidth<HTMLDivElement>()
   const [hover, setHover] = useState<number | null>(null)
   const standard = data.curves.distill_curve.curve, teacher = data.curves.distill_curve_tinit.curve
@@ -152,7 +152,7 @@ export function DraftlabDistill() {
   )
 }
 
-export function DraftlabSweep() {
+export function SpeculativeSweep() {
   const [temperature, setTemperature] = useState(0)
   const [metric, setMetric] = useState<'tpc' | 'accept'>('tpc')
   const [partial, setPartial] = useState(false)
@@ -182,7 +182,7 @@ export function DraftlabSweep() {
   )
 }
 
-export function DraftlabCost() {
+export function SpeculativeCost() {
   const [ref, width] = useWidth<HTMLDivElement>()
   const [acceptance, setAcceptance] = useState(.7)
   const [cost, setCost] = useState(.1)
@@ -220,7 +220,7 @@ export function DraftlabCost() {
   )
 }
 
-export function DraftlabJudge() {
+export function SpeculativeJudge() {
   return (
     <Figure caption="Corrected judge rerun, from the speculative output’s perspective. Intervals are the saved Wilson intervals; judgments in both orders are correlated.">
       {(['spec_vs_target', 'spec_vs_drafter_alone'] as const).map(key => { const j = data.judge[key]; return <div key={key} style={{ margin: '1rem 0 1.5rem' }}>

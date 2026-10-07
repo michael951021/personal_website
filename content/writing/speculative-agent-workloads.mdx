@@ -1,5 +1,5 @@
 ---
-title: "Draftlab: Speculative Decoding for Agent Workloads"
+title: "Speculative Decoding for Agent Workloads"
 date: "2026-10-06"
 summary: Tested how well smaller drafters predict local agent traffic, then fixed the decoder and evaluation. The speed comparison is still pending.
 tags: [Agents, Local LLMs, Speculative Decoding]
@@ -13,7 +13,7 @@ Our local Qwen 27B coding agents supply the traces, including thinking, text, co
 
 On October 6, an audit corrected sampling, cache handling, and confidence intervals. The figures below use the corrected held-out results and judge rerun, alongside the unfinished sweep. Earlier speedup claims need a controlled comparison.
 
-<DraftlabArchitecture />
+<SpeculativeArchitecture />
 
 Qwen2 runs in JAX, with grouped-query attention, rotary positions, RMS normalization, a gated MLP, and a fixed-size key/value cache. Adapters trained in PyTorch are merged into the JAX weights for generation.
 
@@ -31,13 +31,13 @@ Call the target’s next-token distribution `p`, and the distribution that produ
 
 At temperature zero, we keep a draft if it matches the target’s top choice. For sampling, the acceptance and replacement rule preserves the target distribution, so two runs can produce different text. The rule comes from [Leviathan et al., 2023](https://proceedings.mlr.press/v202/leviathan23a.html) and [Chen et al., 2023](https://arxiv.org/abs/2302.01318).
 
-<DraftlabStep />
+<SpeculativeStep />
 
 Drafts after a rejection were predicted using a token we have discarded, so they are discarded too. A fully accepted block can emit `k + 1` tokens, subject to the output limit.
 
 The target cache holds all the committed tokens except the newest one. That newest token stays pending, so the next call sends `[pending_token] + drafts` together. Logit row `j` predicts draft `j`, and the last row predicts the bonus. After accepting `A` drafts, we keep the pending token and accepted prefix in the cache, then the replacement or bonus becomes the next pending token.
 
-Rollback changes the cache’s logical length without recomputing the prefix. Old values can stay in the buffers as long as the attention mask hides them, and the drafter’s cache must match the committed history too. The pending-token setup removed a second target call that used to process the bonus separately. See [`1e9f5d3`](/writing/draftlab/report.html#commit-sampling).
+Rollback changes the cache’s logical length without recomputing the prefix. Old values can stay in the buffers as long as the attention mask hides them, and the drafter’s cache must match the committed history too. The pending-token setup removed a second target call that used to process the bonus separately. See [`1e9f5d3`](/writing/speculative-agent-workloads/report.html#commit-sampling).
 
 Triton verify and alpha kernels have PyTorch references. The alpha evaluator can use the fused kernel on CUDA; the JAX decoder currently verifies drafts in its own loop.
 
@@ -47,7 +47,7 @@ The corpus is split into thinking, text, fenced code, tool calls, and tool resul
 
 The first validation and test splits each had three runs, with one run contributing most of their tokens. The newer hold-out adds 14,974 blocks and 4.24 million tokens across 14 later runs. It excludes runs already present and exact `(kind, text)` duplicates from the older splits.
 
-<DraftlabCorpus />
+<SpeculativeCorpus />
 
 Source: `results/corpus_stats.json`. Tool results are things the agent reads, so being able to predict them does not directly save time generating the agent’s own output.
 
@@ -67,21 +67,21 @@ Alpha here uses unscaled softmax, or temperature 1. The sweep uses temperatures 
 
 LoRA reaches 71.2% overlap with the 1.5B target. N-gram lookup gets 32.28%, and the tiny distilled model gets 1.14%.
 
-<DraftlabOverlap />
+<SpeculativeOverlap />
 
 Coverage means how often the drafter has a proposal. For n-grams, a position with no proposal counts as zero overlap, while the model drafters cover almost every valid position. Source: `results/alpha/{ngram,lora,dpo,tiny}.json`.
 
 DPO adds 0.153 percentage points to the saved estimate. Its interval overlaps with LoRA’s, but separate intervals cannot settle whether the paired difference is statistically clear. The saved results lack that run-level comparison.
 
-<DraftlabKinds />
+<SpeculativeKinds />
 
 Tool calls have more overlap than text or thinking, which is consistent with repeated syntax helping prediction. To separate the effect of training on agent traffic, we would need an unadapted 0.5B baseline and a matched comparison on non-agent text. Those comparisons are missing here.
 
 ## Training the Drafters
 
-<DraftlabStrategies />
+<SpeculativeStrategies />
 
-<DraftlabDistill />
+<SpeculativeDistill />
 
 The student’s validation KL falls by 30.6%, while its held-out overlap is only **1.14%**. Its small capacity, training duration, and block-only training context could contribute to that gap. The experiment did not vary them separately.
 
@@ -89,7 +89,7 @@ For LoRA, the sweep merges the saved adapter into the JAX model with `W ← W + 
 
 ### DPO still has a problem to fix
 
-The DPO pair builder chooses `d = argmax(q)`, then applies an acceptance test using the soft probability `q[d]` and residual `p − q`. Since the token was chosen greedily, those probabilities do not describe how it was produced. The code also prefills a sequence and feeds its last token again when starting cached generation. These findings come from `draftlab/drafters/dpo.py`, which the October 6 decoder fix did not change. Training has not been rerun, so the pairs need checking and rebuilding before the DPO increase can support a claim about this method.
+The DPO pair builder chooses `d = argmax(q)`, then applies an acceptance test using the soft probability `q[d]` and residual `p − q`. Since the token was chosen greedily, those probabilities do not describe how it was produced. The code also prefills a sequence and feeds its last token again when starting cached generation. These findings come from `speculative_agent_workloads/drafters/dpo.py`, which the October 6 decoder fix did not change. Training has not been rerun, so the pairs need checking and rebuilding before the DPO increase can support a claim about this method.
 
 ## Generation and Timing
 
@@ -97,7 +97,7 @@ The corrected sweep generates 32 tokens after short held-out prompts, with draft
 
 Each finished prompt is saved to a sidecar file and folded into Parquet when its cell finishes or restarts. The report reads both formats and removes duplicates by configuration and prompt index.
 
-<DraftlabSweep />
+<SpeculativeSweep />
 
 Sources: `results/sweep.parquet` and its 8 saved sidecars. The target-only baselines, 1.5B sweep, and controlled speed benchmark are still pending in this snapshot, so we do not have a measured speedup to report yet.
 
@@ -105,7 +105,7 @@ Once generation diverges from the recorded trace, the next prediction sees a dif
 
 The identity control uses the target itself as the drafter, where acceptance should be one. At `k = 8`, a full step emits nine tokens, but the 32-token output limit requires four steps. The average is therefore `32 / 4 = 8` tokens per step.
 
-<DraftlabCost />
+<SpeculativeCost />
 
 The model assumes constant, independent acceptance, a proposal at every position, and block verification costing the same as one target decode. It excludes prefill, output limits, EOS, compilation, cache work, and resource contention. [Leviathan et al., generated-token and wall-time analysis](https://proceedings.mlr.press/v202/leviathan23a/leviathan23a.pdf).
 
@@ -117,7 +117,7 @@ The tests compare greedy output with the target, check the cache against a fresh
 
 The judge rerun uses held-out prompts on the fixed engine, with a 0.5B-Instruct target, DPO drafter, `k = 4`, temperature 0.7, and 16 output tokens. The local `qwen-agent` judge receives blind comparisons in both orders, with cached responses and a 150-call cap. These are short-output preference checks, which do not measure completion of coding tasks.
 
-<DraftlabJudge />
+<SpeculativeJudge />
 
 Source: `results/judge.json`, generated October 6. There were 150 calls used and 18 invalid responses, and the chart only counts included verdicts. The file’s order-disagreement rate includes invalid orders in its denominator; the counts separately show prompts with both orders valid.
 
@@ -137,7 +137,7 @@ The evaluator compared token `i` with logit row `i`, which predicts token `i + 1
 
 The fix lines up logits with next-token labels and skips the first position when there is no preceding context. Tests compare cross-entropy with Hugging Face’s shifted loss and check repeated versus shuffled text.
 
-[Code and test diff: 7a84891](/writing/draftlab/report.html#commit-alignment)
+[Code and test diff: 7a84891](/writing/speculative-agent-workloads/report.html#commit-alignment)
 
 ### The cache can still be wrong
 
@@ -145,7 +145,7 @@ The drafter decoded the last committed token twice, and its position marker fail
 
 The fix corrected proposal positions and rollback. Tests compare the drafter’s cache and next proposal with a fresh prefill after rejection and full acceptance. The October 6 change then moved to the pending-token setup described earlier.
 
-[Code and test diff: ae371e3](/writing/draftlab/report.html#commit-cache)
+[Code and test diff: ae371e3](/writing/speculative-agent-workloads/report.html#commit-cache)
 
 ### Sampling the drafts
 
@@ -153,7 +153,7 @@ Drafts were chosen greedily but reported with soft probabilities and without mat
 
 Model drafts now come from `softmax(logits / T)`, and the verifier receives that distribution. At temperature zero, the proposal distribution is one-hot at the greedy token. The decoder sets the drafter’s temperature and seed. This change also removed the extra target call.
 
-[Code and test diff: 1e9f5d3](/writing/draftlab/report.html#commit-sampling)
+[Code and test diff: 1e9f5d3](/writing/speculative-agent-workloads/report.html#commit-sampling)
 
 ### Suspiciously small error bars
 
@@ -161,7 +161,7 @@ The bootstrap dimensions were swapped: `n_runs` replicates with `n_boot` draws e
 
 The corrected version makes `n_boot` replicates, each with `n_runs` session draws. A regression test uses two runs with very different acceptance rates and requires the interval to span both.
 
-[Code and test diff: 0158d68](/writing/draftlab/report.html#commit-bootstrap)
+[Code and test diff: 0158d68](/writing/speculative-agent-workloads/report.html#commit-bootstrap)
 
 ### More tokens do not always mean more evidence
 
@@ -169,7 +169,7 @@ The first splits had few independent sessions. Selecting the first N prompts cou
 
 The changes add a later hold-out, select prompts round-robin across runs, increase generation from 16 to 32 tokens, and add a 1.5B target option. The separate benchmark alternates configurations and includes target-only decoding.
 
-[Code and test diff: 5f98414](/writing/draftlab/report.html#commit-heldout)
+[Code and test diff: 5f98414](/writing/speculative-agent-workloads/report.html#commit-heldout)
 
 ### Knowing when to stop
 
@@ -177,17 +177,17 @@ Serving kept generating after end-of-sequence tokens and returned `finish_reason
 
 It now stops at the tokenizer’s EOS markers, excludes them from completion text, and returns `stop` or `length` accordingly. A no-drafter model is also available for comparisons.
 
-[Code and test diff: 48cf15b](/writing/draftlab/report.html#commit-serving)
+[Code and test diff: 48cf15b](/writing/speculative-agent-workloads/report.html#commit-serving)
 
 ## Future Improvement
 
-<DraftlabNext />
+<SpeculativeNext />
 
 ## Data and Code
 
 The results come from revision `e874bd1` and the files saved when the original report was built. Downloads include the revision, source hashes, confidence intervals, and sweep counts. They contain no prompts, transcript text, token sequences, or run identifiers. The standalone report includes its charts and data for offline use.
 
-[Evidence JSON](/writing/draftlab/evidence.json) · [Metrics CSV](/writing/draftlab/metrics.csv) · [Standalone report and code diffs](/writing/draftlab/report.html)
+[Evidence JSON](/writing/speculative-agent-workloads/evidence.json) · [Metrics CSV](/writing/speculative-agent-workloads/metrics.csv) · [Standalone report and code diffs](/writing/speculative-agent-workloads/report.html)
 
 Data snapshot: October 6, 2026, 19:05:19 UTC. This page keeps those saved results as new experiments finish.
 
@@ -199,7 +199,7 @@ The builder reads saved artifacts and checks whether the pending benchmark files
 ```bash
 python tools/build_presentation.py
 # Optional fresh report at a separate path:
-python tools/build_presentation.py --publish ../../reports/draftlab-report-fresh.html
+python tools/build_presentation.py --publish ../../reports/speculative-agent-workloads-report-fresh.html
 ```
 
 </details>
@@ -210,17 +210,17 @@ python tools/build_presentation.py --publish ../../reports/draftlab-report-fresh
 These commands produce the measurements. Writing the report did not rerun them.
 
 ```bash
-python -m draftlab.eval.alpha --split heldout --blocks 700 --drafter ngram
-python -m draftlab.eval.alpha --split heldout --blocks 700 --drafter hf --draft-model ckpt/lora
-python -m draftlab.eval.alpha --split heldout --blocks 700 --drafter hf --draft-model ckpt/dpo
-python -m draftlab.eval.alpha --split heldout --blocks 700 --drafter hf --draft-model ckpt/tiny/export
-python -m draftlab.sweep --split heldout --num-cpus 12 --cpus-per-cell 4
-python -m draftlab.sweep --split heldout --target models/qwen2.5-1.5b-instruct --drafters ngram lora lora_dpo
+python -m speculative_agent_workloads.eval.alpha --split heldout --blocks 700 --drafter ngram
+python -m speculative_agent_workloads.eval.alpha --split heldout --blocks 700 --drafter hf --draft-model ckpt/lora
+python -m speculative_agent_workloads.eval.alpha --split heldout --blocks 700 --drafter hf --draft-model ckpt/dpo
+python -m speculative_agent_workloads.eval.alpha --split heldout --blocks 700 --drafter hf --draft-model ckpt/tiny/export
+python -m speculative_agent_workloads.sweep --split heldout --num-cpus 12 --cpus-per-cell 4
+python -m speculative_agent_workloads.sweep --split heldout --target models/qwen2.5-1.5b-instruct --drafters ngram lora lora_dpo
 python tools/bench_speedup.py
-python -m draftlab.eval.judge --split heldout
+python -m speculative_agent_workloads.eval.judge --split heldout
 make check
 ```
 
 </details>
 
-<DraftlabSources />
+<SpeculativeSources />

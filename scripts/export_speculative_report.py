@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Export the saved Draftlab report's aggregate data and portable downloads.
+"""Export the saved Speculative report's aggregate data and portable downloads.
 
-Usage: python3 scripts/export_draftlab_report.py [REPORT_HTML]
+Usage: python3 scripts/export_speculative_report.py [REPORT_HTML]
 Defaults to the separate rewritten report in the sibling loop checkout.
 The MDX article stays unchanged. No experiments are rerun.
 """
@@ -32,6 +32,8 @@ def main():
     )
     args = parser.parse_args()
     page = args.report.read_text(encoding="utf-8")
+    segments = re.split(r"(<script\b[^>]*>.*?</script>)", page, flags=re.S)
+    page = "".join(segment if segment.startswith("<script") and ('id="report-data"' in segment or 'id="csv-data"' in segment) else segment.replace("Draftlab", "Speculative Decoding for Agent Workloads").replace("draftlab-commit-", "speculative-commit-").replace("draftlab-evidence", "speculative-agent-workloads-evidence").replace("draftlab-metrics", "speculative-agent-workloads-metrics") for segment in segments)
     evidence_text, evidence = embedded_json(page, "report-data")
     _, csv_text = embedded_json(page, "csv-data")
     charts = {
@@ -45,11 +47,11 @@ def main():
     sources = {
         key: evidence[key] for key in ["generated_at", "revision", "sources", "commits"]
     }
-    public = ROOT / "public/writing/draftlab"
+    public = ROOT / "public/writing/speculative-agent-workloads"
     chart_dir = ROOT / "content/writing/data"
     public.mkdir(parents=True, exist_ok=True)
     chart_dir.mkdir(parents=True, exist_ok=True)
-    for name, value in [("draftlab.json", charts), ("draftlab-sources.json", sources)]:
+    for name, value in [("speculative-agent-workloads.json", charts), ("speculative-sources.json", sources)]:
         (chart_dir / name).write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
     (public / "evidence.json").write_text(evidence_text + "\n", encoding="utf-8")
     (public / "metrics.csv").write_bytes(csv_text.encode("utf-8"))

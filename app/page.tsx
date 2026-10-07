@@ -120,7 +120,7 @@ export default function Home() {
         </section>
 
 
-        {/* The one pinned project */}
+        {/* Latest projects */}
         <section style={{ marginBottom: '5rem' }}>
           <FeaturedProject />
         </section>
