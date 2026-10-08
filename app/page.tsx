@@ -6,24 +6,24 @@ import { DeepLink } from '@/components/deep-link'
 
 export default function Home() {
   return (
-    <div style={{ paddingTop: '16vh', paddingBottom: '6rem' }}>
+    <div style={{ paddingTop: 'clamp(3.5rem, 11vh, 7rem)', paddingBottom: '4rem' }}>
       <div style={{}}>
 
         {/* Intro */}
-        <section style={{ marginBottom: '5rem' }}>
+        <section style={{ marginBottom: '4.5rem' }}>
           {/* flex-col on mobile, flex-row on ≥640 px */}
-          <div className="flex items-start gap-8 flex-col sm:flex-row">
+          <div className="flex items-center gap-10 flex-col sm:flex-row">
 
             {/* Text */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <h1
                 style={{
-                  fontFamily: 'var(--font-serif)',
+                  fontFamily: 'var(--font-sans)',
                   fontSize: 'var(--text-2xl)',
-                  fontWeight: 400,
-                  letterSpacing: '-0.025em',
-                  lineHeight: 1.1,
-                  marginBottom: '1.25rem',
+                  fontWeight: 500,
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1.05,
+                  marginBottom: '1rem',
                   color: 'var(--color-ink)',
                 }}
               >
@@ -31,10 +31,10 @@ export default function Home() {
               </h1>
               <p
                 style={{
-                  fontSize: '17px',
-                  lineHeight: 1.85,
+                  fontSize: 'var(--text-md)',
+                  lineHeight: 1.55,
                   color: 'var(--color-ink)',
-                  maxWidth: '520px',
+                  maxWidth: '30em',
                 }}
               >
                 {site.bio}
@@ -103,9 +103,8 @@ export default function Home() {
                     borderRadius: '50%',
                     objectFit: 'cover',
                     display: 'block',
-                    filter: 'saturate(0.85) brightness(0.97)',
-                    boxShadow:
-                      '0 0 28px rgba(18,52,110,0.20), 0 0 56px rgba(18,52,110,0.10)',
+                    // Flat like the illustrations: a navy outline instead of a glow
+                    boxShadow: '0 0 0 2px var(--color-ink)',
                   }}
                 />
               </div>
@@ -121,7 +120,7 @@ export default function Home() {
 
 
         {/* Latest projects */}
-        <section style={{ marginBottom: '5rem' }}>
+        <section style={{ marginBottom: '4rem' }}>
           <FeaturedProject />
         </section>
 

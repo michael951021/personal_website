@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Newsreader, JetBrains_Mono } from 'next/font/google'
+import { Instrument_Sans, JetBrains_Mono } from 'next/font/google'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
 import { Underwater } from '@/components/underwater'
@@ -7,12 +7,10 @@ import { HoverBubbles } from '@/components/bubbles'
 import { site } from '@/lib/config'
 import './globals.css'
 
-// Variable font with the optical-size axis: headings get Newsreader's display cuts automatically
-const newsreader = Newsreader({
+// Sans for text, mono for data and labels: both stay out of the way of the pixel art
+const instrumentSans = Instrument_Sans({
   subsets: ['latin'],
-  axes: ['opsz'],
-  style: ['normal', 'italic'],
-  variable: '--font-newsreader',
+  variable: '--font-instrument',
   display: 'swap',
 })
 
@@ -46,7 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${newsreader.variable} ${jetbrainsMono.variable}`}
+      className={`${instrumentSans.variable} ${jetbrainsMono.variable}`}
     >
       <body>
         {/* Fixed background layers: fish + rays, painted below content */}
@@ -60,9 +58,9 @@ export default function RootLayout({
         <div
           className="min-h-dvh flex flex-col"
           style={{
-            maxWidth: '960px',
+            maxWidth: '1000px',
             margin: '0 auto',
-            padding: '0 clamp(1.25rem, 4vw, 3.5rem)',
+            padding: '0 clamp(1.25rem, 5vw, 3.5rem)',
             position: 'relative',
             zIndex: 1,
             background: 'transparent',

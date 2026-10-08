@@ -23,21 +23,13 @@ export default function Skills() {
   })
 
   return (
-    <div style={{ paddingTop: '5rem', paddingBottom: '6rem' }}>
-      <div style={{ maxWidth: '720px' }}>
+    <div style={{ paddingTop: '4rem', paddingBottom: '4rem' }}>
+      <div>
 
         {/* Heading */}
         <h1 className="page-title">Skills</h1>
 
-        <p
-          style={{
-            fontSize:     '17px',
-            lineHeight:   1.75,
-            color:        'var(--color-ink)',
-            marginBottom: '2rem',
-            maxWidth:     '520px',
-          }}
-        >
+        <p className="page-lede" style={{ marginBottom: '2.5rem' }}>
           What I&rsquo;ve worked with, mostly on the ML side. Filter by area or by where I used it, and open a row to
           see what I actually did with it.
         </p>

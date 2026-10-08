@@ -8,26 +8,26 @@ export const metadata: Metadata = {
 
 export default function About() {
   return (
-    <div style={{ paddingTop: '5rem', paddingBottom: '6rem' }}>
-      <div style={{ maxWidth: '680px' }}>
+    <div style={{ paddingTop: '4rem', paddingBottom: '4rem' }}>
+      <div style={{ maxWidth: '640px' }}>
 
-        <h1 className="page-title" style={{ marginBottom: '2.5rem' }}>About</h1>
+        <h1 className="page-title" style={{ marginBottom: '2rem' }}>About</h1>
 
         {/* Bio */}
         <div style={{ marginBottom: '3.5rem' }}>
-          <p style={{ fontSize: 'var(--text-md)', lineHeight: 1.6, marginBottom: '1.4rem', letterSpacing: '-0.01em' }}>
+          <p style={{ fontSize: 'var(--text-md)', lineHeight: 1.55, marginBottom: '1.4rem', letterSpacing: '-0.01em' }}>
             I&rsquo;m Kevin, a computer science student at Cornell. I like the part of machine learning where the model
             meets everything around it: the serving stack, what ends up in the context window, and the numbers that
             tell you whether a change actually helped.
           </p>
-          <p style={{ fontSize: '17px', lineHeight: 1.85, color: 'var(--color-ink)', marginBottom: '1.2rem' }}>
+          <p style={{ lineHeight: 1.7, color: 'var(--color-ink)', marginBottom: '1.2rem' }}>
             This summer I was at <strong style={{ fontWeight: 500 }}>Gail</strong>, working on the realtime voice agent
             that answers the phone for insurance agencies. Most of my work lived at the edges of a live call: switching
             speech-to-text providers mid-call so an email address gets spelled out right, racing a second LLM request
             when the first one stalls, filler phrases in sixteen languages so a slow tool call doesn&rsquo;t sound like a
             dropped line, and tracing so you can see where every turn spent its time.
           </p>
-          <p style={{ fontSize: '17px', lineHeight: 1.85, color: 'var(--color-ink)' }}>
+          <p style={{ lineHeight: 1.7, color: 'var(--color-ink)' }}>
             Right now I&rsquo;m running long-lived agent loops on my own hardware (two 3090s, two Qwen models) and{' '}
             <Link href="/writing/local-multi-agent-loop" className="link-underline">writing up</Link>{' '}
             what makes them better. On the side: whether Muon works because its Newton&ndash;Schulz step approximates the polar factor,
@@ -37,7 +37,7 @@ export default function About() {
         </div>
 
         {/* Divider */}
-        <hr style={{ border: 'none', borderTop: '1px solid var(--color-muted)', margin: '2.5rem 0' }} />
+        <hr style={{ border: 'none', borderTop: '1px solid var(--color-rule)', margin: '2.5rem 0' }} />
 
         {/* Background */}
         <div style={{ marginBottom: '3rem' }}>
@@ -53,7 +53,7 @@ export default function About() {
                 key={label}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '120px 1fr',
+                  gridTemplateColumns: '7.5rem 1fr',
                   gap: '0 1.5rem',
                   marginBottom: '0.6rem',
                   alignItems: 'baseline',
@@ -61,7 +61,10 @@ export default function About() {
               >
                 <dt
                   style={{
-                    fontSize: 'var(--text-base)',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 'var(--text-xs)',
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
                     color: 'var(--color-muted)',
                   }}
                 >
@@ -76,7 +79,7 @@ export default function About() {
         </div>
 
         {/* Divider */}
-        <hr style={{ border: 'none', borderTop: '1px solid var(--color-muted)', margin: '2.5rem 0' }} />
+        <hr style={{ border: 'none', borderTop: '1px solid var(--color-rule)', margin: '2.5rem 0' }} />
 
         {/* Contact */}
         <div>

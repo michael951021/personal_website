@@ -33,7 +33,7 @@ export default async function PostPage({
   const { data, content } = result
 
   return (
-    <div style={{ paddingTop: '3.5rem', paddingBottom: '6rem' }}>
+    <div style={{ paddingTop: '2.5rem', paddingBottom: '4rem' }}>
       <div style={{ maxWidth: '100%' }}>
 
         <Link
@@ -47,7 +47,7 @@ export default async function PostPage({
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.4rem',
-            marginBottom: '2.5rem',
+            marginBottom: '1.5rem',
           }}
         >
           ← Writing
@@ -58,10 +58,10 @@ export default async function PostPage({
           <header style={{ marginBottom: '2rem' }}>
             <h1
               style={{
-                fontFamily: 'var(--font-serif)',
+                fontFamily: 'var(--font-sans)',
                 fontSize: 'var(--text-2xl)',
-                fontWeight: 400,
-                letterSpacing: '-0.025em',
+                fontWeight: 500,
+                letterSpacing: '-0.03em',
                 lineHeight: 1.1,
                 color: 'var(--color-ink)',
                 marginBottom: '1rem',
@@ -73,7 +73,7 @@ export default async function PostPage({
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: '0.5rem 1.25rem',
+                gap: '0.35rem 0.75rem',
                 fontFamily: 'var(--font-mono)',
                 fontSize: 'var(--text-xs)',
                 letterSpacing: '0.02em',
@@ -98,7 +98,7 @@ export default async function PostPage({
             </div>
           )}
 
-          <hr style={{ border: 'none', borderTop: '1px solid var(--color-muted)', marginBottom: '2rem' }} />
+          <hr style={{ border: 'none', borderTop: '1px solid var(--color-rule)', marginBottom: '2rem' }} />
 
           <article>
             <MDXRemote source={content} components={{ ...mdxComponents, ...writingComponents }} />

@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { site } from '@/lib/config'
 
 const links = [
   { href: '/writing', label: 'Writing' },
@@ -14,7 +13,7 @@ export function Nav() {
   const pathname = usePathname()
 
   return (
-    <header style={{ paddingTop: '2.5rem', paddingBottom: '1rem' }}>
+    <header style={{ paddingTop: '2rem', paddingBottom: '1rem' }}>
       <nav
         className="flex items-baseline justify-between"
         aria-label="Site navigation"
@@ -22,12 +21,12 @@ export function Nav() {
         <Link
           href="/"
           className="transition-opacity duration-150 hover:opacity-55"
-          style={{ fontFamily: 'var(--font-serif)', fontSize: '15px', color: 'var(--color-ink)' }}
+          style={{ fontFamily: 'var(--font-sans)', fontSize: 'var(--text-sm)', fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--color-ink)' }}
         >
           {"Home"}
         </Link>
 
-        <div className="flex gap-8">
+        <div className="flex gap-6 sm:gap-8">
           {links.map(({ href, label }) => {
             const active = pathname === href || pathname.startsWith(href + '/')
             return (

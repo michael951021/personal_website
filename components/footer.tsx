@@ -4,10 +4,10 @@ export function Footer() {
   return (
     <footer
       style={{
-        paddingTop: '2.5rem',
+        paddingTop: '1.5rem',
         paddingBottom: '2rem',
-        borderTop: '1px solid var(--color-muted)',
-        marginTop: '4rem',
+        borderTop: '1px solid var(--color-rule)',
+        marginTop: '3rem',
       }}
     >
       <div

@@ -158,7 +158,7 @@ export function SkillList({ skills }: { skills: SkillEntry[] }) {
                 onPlace={pickPlace}
               />
             ))}
-            <li style={{ borderTop: '1px solid var(--color-muted)' }} />
+            <li style={{ borderTop: '1px solid var(--color-rule)' }} />
           </ol>
         </section>
       ))}

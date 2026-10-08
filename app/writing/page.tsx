@@ -11,19 +11,19 @@ export default function Writing() {
   const posts = getAllPosts()
 
   return (
-    <div style={{ paddingTop: '5rem', paddingBottom: '6rem' }}>
-      <div style={{ maxWidth: '680px' }}>
+    <div style={{ paddingTop: '4rem', paddingBottom: '4rem' }}>
+      <div>
 
-        <div style={{ marginBottom: '3rem' }}>
+        <div style={{ marginBottom: '2.5rem' }}>
           <h1 className="page-title">Writing</h1>
-          <p style={{ fontSize: '17px', lineHeight: 1.75, color: 'var(--color-ink)', maxWidth: '480px' }}>
+          <p className="page-lede">
             Reports and notes from experiments, with the data behind them.
           </p>
         </div>
 
         <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {posts.map(post => (
-            <li key={post.slug} className="writing-project" style={{ borderTop: '1px solid var(--color-muted)' }}>
+            <li key={post.slug} className="writing-project" style={{ borderTop: '1px solid var(--color-rule)' }}>
               <Link
                 href={`/writing/${post.slug}`}
                 style={{ display: 'block', flex: 1, minWidth: 0, padding: '1.4rem 0', textDecoration: 'none' }}
@@ -31,8 +31,7 @@ export default function Writing() {
               >
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.5rem 1rem' }}>
                   <span
-                    style={{ fontSize: 'var(--text-md)', color: 'var(--color-ink)', letterSpacing: '-0.01em' }}
-                    className="group-hover:italic"
+                    className="writing-title"
                   >
                     {post.title}
                   </span>
@@ -48,7 +47,7 @@ export default function Writing() {
                     {formatDate(post.date)}
                   </span>
                 </div>
-                <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--color-muted)', margin: '0.35rem 0 0' }}>
+                <p style={{ fontSize: 'var(--text-sm)', lineHeight: 1.6, color: 'var(--color-muted)', margin: '0.4rem 0 0', maxWidth: '36em' }}>
                   {post.summary}
                 </p>
               </Link>
@@ -57,7 +56,7 @@ export default function Writing() {
               )}
             </li>
           ))}
-          <li style={{ borderTop: '1px solid var(--color-muted)' }} />
+          <li style={{ borderTop: '1px solid var(--color-rule)' }} />
         </ol>
 
       </div>

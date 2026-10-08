@@ -24,7 +24,7 @@ export function FeaturedProject() {
         </Link>
       </h2>
 
-      <p style={{ fontSize: 'var(--text-base)', lineHeight: 1.7, color: 'var(--color-ink)', margin: '0.75rem 0 0.9rem', maxWidth: '620px' }}>
+      <p className="featured-summary">
         {current.summary}
       </p>
 
@@ -41,7 +41,7 @@ export function FeaturedProject() {
       </div>
       <ProjectAnimation scene="local-multi-agent-loop" compact />
     </div>
-    <div className="featured project-feature" style={{ marginTop: '2.5rem' }}>
+    <div className="featured project-feature" style={{ marginTop: '3rem' }}>
       <div>
         <p className="featured-label">Recent experiment</p>
         <h2 style={{ margin: 0 }}>
@@ -49,7 +49,7 @@ export function FeaturedProject() {
             Speculative Decoding for Agent Workloads
           </Link>
         </h2>
-        <p style={{ fontSize: 'var(--text-base)', lineHeight: 1.7, margin: '0.75rem 0 1rem' }}>
+        <p className="featured-summary">
           Smaller models draft agent output; a target checks each block. Held-out prediction tests and a corrected decoder, with the speed comparison still pending.
         </p>
         <Link href="/writing/speculative-agent-workloads" className="button" data-bubbles>Read the report →</Link>
