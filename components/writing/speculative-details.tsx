@@ -26,12 +26,12 @@ export function SpeculativeStrategies() {
 
 export function SpeculativeNext() {
   return <SpeculativeTable label="Remaining experiments" headers={['Question', 'Next measurement', 'Saved status']} rows={[
-    ['Does speculation save time?', 'Compare the fixed engine with target-only decoding on matched prompts and controlled timing.', 'Benchmark results pending.'],
-    ['Does a smaller drafter help a larger target?', 'Run the 1.5B sweep with the 0.5B adapters, then compare timing.', '1.5B sweep pending.'],
+    ['Does speculation save time?', 'Compare the fixed engine with target-only decoding on matched prompts and controlled timing.', 'Measured on CPU: 1.58× (LoRA, k = 2) and 1.50× (n-gram, k = 8) on the 1.5B target.'],
+    ['Does a smaller drafter help a larger target?', 'Run the 1.5B sweep with the 0.5B adapters, then compare timing.', 'Done: 1.97 tokens per call at k = 2, and the speedup above.'],
     ['Does DPO improve acceptance?', 'Rebuild preference pairs, compare within runs, and include the unadapted model.', 'Small observed increase; effect unresolved.'],
-    ['Do corpus scores predict generation?', 'Score generated histories at the same positions and temperature on the fixed engine.', 'Saved trajectories predate the fixes.'],
+    ['Do corpus scores predict generation?', 'Score generated histories at the same positions and temperature on the fixed engine.', 'Done on the fixed engine: measured k = 1 acceptance falls inside the predicted interval.'],
     ['Does the GPU path improve latency?', 'Benchmark kernels and serving on a GPU, with target-only and speculative configurations.', 'Host script exists; no GPU results.'],
-    ['Can someone reproduce it?', 'Check a fresh clone, explicitly skip missing data or models, then run the full verification checks.', 'An open task lists four missing-data test failures.'],
+    ['Can someone reproduce it?', 'Check a fresh clone, explicitly skip missing data or models, then run the full verification checks.', 'Clean-clone tests pass with data-dependent tests skipped.'],
   ]} />
 }
 

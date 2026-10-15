@@ -155,29 +155,67 @@ export function SpeculativeDistill() {
 export function SpeculativeSweep() {
   const [temperature, setTemperature] = useState(0)
   const [metric, setMetric] = useState<'tpc' | 'accept'>('tpc')
-  const [partial, setPartial] = useState(false)
-  const cells = data.sweep.cells as Cell[]
+  const [target, setTarget] = useState<'0.5' | '1.5'>('1.5')
+  const sweep = target === '1.5' ? data.sweep15 : data.sweep
+  const cells = sweep.cells as Cell[]
+  const rows = ['ngram', 'tiny', 'base', 'lora', 'lora_dpo'].filter(name => cells.some(c => c.drafter === name))
+  const complete = cells.filter(c => c.status === 'complete').length
   return (
-    <Figure caption={<>{metric === 'tpc' ? 'Tokens per step = emitted tokens / target steps.' : 'Accepted / drafted includes scored drafts after the first rejection.'} Finished cells use the same 115 prompts. Striped cells are unfinished and use different subsets; pending cells have no measurement. Target-only baselines are pending.</>} controls={
+    <Figure caption={<>{metric === 'tpc' ? 'Tokens per step = emitted tokens / target steps.' : 'Accepted / drafted includes scored drafts after the first rejection.'} Every cell uses the same {sweep.n_prompts_per_cell} held-out prompts. Sweep wall times are not used for speed, since cells ran concurrently; see the head-to-head benchmark below.</>} controls={
       <>
+        {(['1.5', '0.5'] as const).map(t => <Toggle key={t} active={target === t} onClick={() => setTarget(t)}>{t}B target</Toggle>)}
         {[0, .7].map(t => <Toggle key={t} active={temperature === t} onClick={() => setTemperature(t)}>T = {t}</Toggle>)}
         <label style={{ ...smallStyle, display: 'flex', gap: 8, alignItems: 'center' }}>Metric <select aria-label="Decoding sweep metric" value={metric} onChange={e => setMetric(e.target.value as 'tpc' | 'accept')} style={selectStyle}><option value="tpc">Tokens per target step</option><option value="accept">Accepted / drafted</option></select></label>
-        <label style={{ ...smallStyle, display: 'flex', gap: 6, alignItems: 'center' }}><input type="checkbox" checked={partial} onChange={e => setPartial(e.target.checked)} />Show partial estimates</label>
       </>
     }>
       <div role="region" aria-label="Decoding sweep" tabIndex={0} style={{ overflowX: 'auto' }}>
         <table aria-label="Decoding sweep" style={{ ...tableStyle, minWidth: 360 }}>
           <thead><tr><th scope="col" style={cellStyle}>Drafter</th>{[1, 2, 4, 8].map(k => <th key={k} scope="col" style={{ ...cellStyle, textAlign: 'center' }}>k = {k}</th>)}</tr></thead>
-          <tbody>{['ngram', 'tiny', 'base', 'lora', 'lora_dpo'].map(name => <tr key={name}>
+          <tbody>{rows.map(name => <tr key={name}>
             <th scope="row" style={{ ...cellStyle, fontWeight: 500 }}>{names[name]}</th>
-            {[1, 2, 4, 8].map(k => { const c = cells.find(c => c.drafter === name && c.k === k && c.temp === temperature); const pending = !c || c.status === 'pending'; const value = c?.[metric]; const show = !pending && (c.status !== 'partial' || partial); return <td key={k} style={{ ...cellStyle, textAlign: 'center', background: c?.status === 'partial' ? 'repeating-linear-gradient(135deg, transparent, transparent 7px, color-mix(in srgb, var(--color-muted) 10%, transparent) 7px, color-mix(in srgb, var(--color-muted) 10%, transparent) 14px)' : c?.status === 'complete' ? 'color-mix(in srgb, #2fae94 12%, transparent)' : undefined }}>
-              {show && value != null ? metric === 'accept' ? pct(value) : value.toFixed(2) : pending ? 'Pending' : 'Partial'}
-              <div style={smallStyle}>{pending ? '0 prompts' : `${c.status === 'partial' ? 'partial · ' : ''}${c.n_prompts} prompts`}</div>
+            {[1, 2, 4, 8].map(k => { const c = cells.find(c => c.drafter === name && c.k === k && c.temp === temperature); const value = c?.[metric]; return <td key={k} style={{ ...cellStyle, textAlign: 'center' }}>
+              {c && value != null ? metric === 'accept' ? pct(value) : value.toFixed(2) : '—'}
             </td> })}
           </tr>)}</tbody>
         </table>
       </div>
-      <div style={{ ...smallStyle, marginTop: 12 }}>26 complete · 8 partial · 8 pending · 42 configurations, including two target-only baselines<br />0.5B-Instruct target · 32 output tokens per prompt</div>
+      <div style={{ ...smallStyle, marginTop: 12 }}>{complete} of {cells.length} configurations complete, including target-only baselines · {target}B-Instruct target · {sweep.n_gen} output tokens per prompt</div>
+    </Figure>
+  )
+}
+
+type Bench = { target: string; drafter: string; k: number; temp: number; tok_s: number; speedup: number; speedup_range: number[]; accept: number | null; tokens_per_step: number }
+
+export function SpeculativeSpeedup() {
+  const [ref, width] = useWidth<HTMLDivElement>()
+  const [hover, setHover] = useState<number | null>(null)
+  const rows = (data.speedup.rows as Bench[]).filter(r => r.drafter !== 'none')
+  const base = (target: string, temp: number) => (data.speedup.rows as Bench[]).find(r => r.target === target && r.drafter === 'none' && r.temp === temp)
+  const left = width < 460 ? 118 : 190
+  const max = 1.8
+  const x = (v: number) => left + v / max * (width - left - 56)
+  const label = (r: Bench) => `${r.target.includes('1.5b') ? '1.5B' : '0.5B'} · ${names[r.drafter]} k=${r.k}${r.temp ? ` T=${r.temp}` : ''}`
+  const color = (r: Bench) => r.drafter === 'ngram' ? SERIES[1] : SERIES[2]
+  return (
+    <Figure caption={<>Wall-clock speedup vs target-only decoding on the same {(data.speedup.rows as (Bench & { n_prompts: number })[])[0].n_prompts} held-out prompts, {data.speedup.n_gen} tokens each, one process after compile warm-up, configurations interleaved over {data.speedup.reps} repetitions. Lines: range across repetitions. CPU only.</>}>
+      <div ref={ref} style={{ position: 'relative' }}>
+        <svg viewBox={`0 0 ${width} ${rows.length * 40 + 40}`} style={{ display: 'block', width: '100%' }} role="img" aria-label={rows.map(r => `${label(r)}: ${r.speedup.toFixed(2)}×`).join(', ')}>
+          {[0, .5, 1, 1.5].map(v => <g key={v}><line x1={x(v)} x2={x(v)} y1={8} y2={rows.length * 40 + 12} stroke="var(--color-border)" strokeDasharray={v === 1 ? '4 4' : undefined} /><text x={x(v)} y={rows.length * 40 + 30} textAnchor="middle" {...chartText}>{v}×</text></g>)}
+          {rows.map((r, i) => { const y = 28 + i * 40; return (
+            <g key={i} tabIndex={0} aria-label={`${label(r)} ${r.speedup.toFixed(2)}×`} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(i)} onBlur={() => setHover(null)}>
+              <rect x={0} y={y - 18} width={width} height={36} fill="transparent" />
+              <text x={0} y={y + 4} {...chartText}>{label(r)}</text>
+              <rect x={x(0)} y={y - 7} width={Math.max(0, x(r.speedup) - x(0) - 2)} height={14} rx={4} fill={color(r)} opacity={hover === null || hover === i ? 1 : .45} />
+              <line x1={x(r.speedup_range[0])} x2={x(r.speedup_range[1])} y1={y} y2={y} stroke="var(--color-ink)" strokeWidth={2} />
+              <text x={x(Math.max(r.speedup, r.speedup_range[1])) + 8} y={y + 4} {...chartText} fill="var(--color-ink)">{r.speedup.toFixed(2)}×</text>
+            </g>) })}
+        </svg>
+        {hover !== null && (() => { const r = rows[hover], b = base(r.target, r.temp); return <Tip x={x(r.speedup)} y={28 + hover * 40} width={width}>
+          <strong>{label(r)}</strong><br />{r.tok_s.toFixed(2)} tok/s vs {b?.tok_s.toFixed(2)} target-only<br />speedup {r.speedup.toFixed(2)}× ({r.speedup_range[0].toFixed(2)}–{r.speedup_range[1].toFixed(2)})<br />acceptance {r.accept != null ? pct(r.accept) : '—'} · {r.tokens_per_step.toFixed(2)} tokens/step
+        </Tip> })()}
+      </div>
+      <Legend items={[{ name: 'N-gram', color: SERIES[1] }, { name: 'LoRA', color: SERIES[2] }]} />
+      <SpeculativeTable label="Measured speedups" headers={['Configuration', 'tok/s', 'Target-only tok/s', 'Speedup', 'Acceptance', 'Tokens / step']} rows={rows.map(r => [label(r), r.tok_s.toFixed(2), base(r.target, r.temp)?.tok_s.toFixed(2) ?? '—', `${r.speedup.toFixed(2)}×`, r.accept != null ? pct(r.accept) : '—', r.tokens_per_step.toFixed(2)])} />
     </Figure>
   )
 }

@@ -1,7 +1,7 @@
 ---
 title: "Speculative Decoding for Agent Workloads"
 date: "2026-10-06"
-summary: Tested how well smaller drafters predict local agent traffic, then fixed the decoder and evaluation. The speed comparison is still pending.
+summary: Tested how well smaller drafters predict local agent traffic, fixed the decoder and evaluation, then measured it. A LoRA drafter makes a 1.5B target 1.58× faster on CPU.
 tags: [Agents, Local LLMs, Speculative Decoding]
 ---
 
@@ -11,7 +11,9 @@ A language model normally generates one token at a time, where a token can be pa
 
 Our local Qwen 27B coding agents supply the traces, including thinking, text, code, and tool traffic. **The experiments here use 1.5B and 0.5B targets**, so they do not measure a speedup of the original 27B agents.
 
-On October 6, an audit corrected sampling, cache handling, and confidence intervals. The figures below use the corrected held-out results and judge rerun, alongside the unfinished sweep. Earlier speedup claims need a controlled comparison.
+On October 6, an audit corrected sampling, cache handling, and confidence intervals. Everything below uses the fixed engine: the held-out results, the judge rerun, the full sweeps on both targets, and a controlled head-to-head speed benchmark.
+
+**The short version:** a LoRA drafter overlaps with the 1.5B target on about 71% of the probability mass, n-grams on about 32%. On CPU, that buys a measured **1.58×** speedup with LoRA at `k = 2` and **1.50×** with n-grams at `k = 8`. Longer LoRA drafts get slower again, since each draft token costs a forward pass of the 0.5B drafter.
 
 <SpeculativeArchitecture />
 
@@ -99,7 +101,7 @@ Each finished prompt is saved to a sidecar file and folded into Parquet when its
 
 <SpeculativeSweep />
 
-Sources: `results/sweep.parquet` and its 8 saved sidecars. The target-only baselines, 1.5B sweep, and controlled speed benchmark are still pending in this snapshot, so we do not have a measured speedup to report yet.
+Sources: `results/sweep.parquet` (0.5B target) and `results/sweep_1.5b.parquet` (1.5B target, n-gram and LoRA drafters). Both grids are complete, target-only baselines included. With the 1.5B target, LoRA emits 1.97 tokens per target call at `k = 2` and 2.57 at `k = 8`.
 
 Once generation diverges from the recorded trace, the next prediction sees a different history. Alpha on recorded prefixes cannot describe all of those later contexts. The accepted/drafted ratio also counts drafts after the first rejection, even though they cannot be committed, so changing `k` can change that ratio while first-token overlap stays the same.
 
@@ -109,7 +111,13 @@ The identity control uses the target itself as the drafter, where acceptance sho
 
 The model assumes constant, independent acceptance, a proposal at every position, and block verification costing the same as one target decode. It excludes prefill, output limits, EOS, compilation, cache work, and resource contention. [Leviathan et al., generated-token and wall-time analysis](https://proceedings.mlr.press/v202/leviathan23a/leviathan23a.pdf).
 
-`tools/bench_speedup.py` warms up the model shapes, alternates configurations over repeated passes, and compares each with target-only decoding on the same prompts. Its result file, `results/speedup_bench.json`, was absent from this snapshot. Timings from concurrent sweep workers cannot establish the runtime saving.
+`tools/bench_speedup.py` warms up the model shapes, alternates configurations over repeated passes, and compares each with target-only decoding on the same prompts, in one process with nothing else running. Timings from concurrent sweep workers can't establish a runtime saving, so this is the only place speed numbers come from.
+
+<SpeculativeSpeedup />
+
+Source: `results/speedup_bench.json`. The best setting is LoRA with short drafts. At `k = 2` it emits 1.86 tokens per target step and runs 1.58× faster. At `k = 4` it emits more per step (2.14) but only gets 1.25×, because every extra draft token is a full 0.5B forward, and on CPU that is far from free next to a 1.5B forward. N-grams cost almost nothing to draft, so they can afford `k = 8` and still reach 1.50× with only 20% acceptance.
+
+These are CPU numbers. On a GPU the target forward is memory-bound, the draft-to-target cost ratio is different, and the best `k` will probably move up.
 
 ## Checking the Output
 
@@ -189,7 +197,7 @@ The results come from revision `e874bd1` and the files saved when the original r
 
 [Evidence JSON](/writing/speculative-agent-workloads/evidence.json) · [Metrics CSV](/writing/speculative-agent-workloads/metrics.csv) · [Standalone report and code diffs](/writing/speculative-agent-workloads/report.html)
 
-Data snapshot: October 6, 2026, 19:05:19 UTC. This page keeps those saved results as new experiments finish.
+Data snapshot: October 6, 2026, 19:05:19 UTC, with the completed sweeps and the speed benchmark added from the October 7 runs. The project's `REPORT.md` recomputes every number it states from `results/` with `tools/check_report.py`.
 
 <details>
 <summary>Rebuilding the original data report</summary>
