@@ -1,0 +1,81 @@
+---
+title: "Muon: Accuracy or Shape?"
+date: "2026-10-15"
+summary: Built a certified family of Newton–Schulz polynomials and ran a budget-matched study on two 3090s to see whether Muon works because it orthogonalizes well, or because of the spectral shape it leaves behind.
+tags: [Optimizers, Training, Research]
+---
+
+Hi! The goal of this project was to answer a question that bugged me about the Muon optimizer: does it work because it orthogonalizes the gradient *well*, or because of the *shape* it leaves the gradient in?
+
+Muon takes each weight matrix's momentum and replaces it with something close to its polar factor, where every singular value is pushed to 1. It does that with five steps of a quintic polynomial (Newton–Schulz). Except the standard polynomial, Keller Jordan's, was tuned for speed, not accuracy. It never actually gets to the polar factor; it squashes the singular values into a band of roughly 0.7 to 1.3 and calls it a day. And it still trains great!
+
+So which part matters? My hypothesis (H1) was that the band shape is what does the work, so a deliberately shaped band could beat both Keller's polynomial *and* the exact polar factor.
+
+## Building the Family
+
+The first half of this project (back in August) was making a family of polynomials where one knob, γ, sets the width of the band. Every member is composed five times, so they all cost the same. For each γ, a constrained solver finds the polynomial that pulls the smallest singular values into the band, while making sure the iteration stays bounded and positive.
+
+Three things turned out to be load-bearing, and each one looked like an unnecessary complication until the naive version failed:
+
+- **The band is relative, not absolute.** Emitting every singular value at 0.7 is the same optimizer as emitting 1.0 with a smaller learning rate, so absolute error would mix up γ with the learning rate.
+- **Boundedness is a fixed point of the reachable set.** The obvious constraint rejects Keller's polynomial itself, and any constraint that rejects a working optimizer is the wrong constraint.
+- **Positivity, not monotonicity.** Keller's polynomial is non-monotone on purpose; that's how it squashes big singular values back down.
+
+Before training anything, I had the stage 1–2 code audited. The audit found that my certificates were *sampled* on a grid, which can miss narrow oscillations. So the checks are now analytic (derivative roots, exact image intervals), and anything that doesn't converge fails closed. Kind of a boring fix, but it's the difference between "I checked some points" and "this is actually true."
+
+## The Study
+
+Then the fun part: two RTX 3090s, an 8-hour budget, and a protocol that decides everything before looking at the test set.
+
+1. Calibrate the actual GPUs, then fit step counts to the time budget so every arm trains for the same number of steps.
+2. Sweep a CIFAR-10 CNN: 21 arm/precision pairs × 3 learning rates × 2 seeds, 126 runs. Pick each arm's best learning rate on validation loss, and pick the best γ.
+3. Confirm on 3 fresh seeds: the winning γ, Keller, and exact SVD, on CIFAR-10 and a ~124M-parameter GPT trained on FineWeb, in fp32 and bf16.
+
+The sweep picked **γ = 0.20**, a slightly *tighter* band than Keller's (which sits around γ ≈ 0.30).
+
+## Results
+
+<MuonPaired />
+
+**On CIFAR-10, the γ = 0.20 fit beats Keller in bf16**, and the interval stays below zero (−0.0047, CI [−0.0081, −0.0013]). That's real but small: about 0.1 points of accuracy. In fp32 the gap is the same size, but the interval crosses zero.
+
+**On the language model, nothing resolves.** Every arm ends at a test loss of 5.47 and 20.4% next-token accuracy. To be fair to the language model, the budget only allowed about 6.3M tokens per run, which is super early in training compared to the billions of tokens Muon is usually judged on.
+
+**Exact SVD matches Keller everywhere, at 12× the wall clock on the GPT** (8,109 s per run vs 657 s). Being more accurate than Keller didn't buy anything here.
+
+So H1 isn't supported, but it isn't ruled out either.
+
+## What the Polynomial Actually Did
+
+The certificates say what happens to singular values between σ_min and 1. But real gradients don't follow the certificate, so I logged what the applied update actually looked like during training:
+
+<MuonSpectra />
+
+γ = 0.20 does what it was fit to do: its band is tighter at the top (max 1.20 vs Keller's 1.30). But the interesting part is the bottom. In the GPT, about **a quarter of each update's singular values (23–25%) sit below σ_min**, for both arms, so the polynomial never pulls them into the band at all. On CIFAR it's 6–7%. In other words, the "shape" only controls part of the spectrum these models actually produce, which might be why the language model can't tell the arms apart.
+
+## Things That Went Wrong
+
+Firstly, the learning-rate grid was too narrow:
+
+<MuonTuning />
+
+Every CIFAR arm picked the largest rate (0.08) and every GPT arm picked the smallest (0.005). So the comparisons happen at a learning rate that is equally off for every arm, but not at each arm's best. This is the biggest weakness of the result.
+
+Secondly, wide bands blow up in bf16. Three tuning runs hit infinite gradients or loss, all with wide bands (γ = 0.45 and 0.60), all in bf16, never in fp32. The first time it happened, it crashed the whole study an hour in (spoiler: it crashed again on the second try, from a different bug in the same fix). Now a diverged tuning run is recorded as a result, its learning rate can't be selected, and it's listed in the report. A divergence in the final confirmation runs still stops everything, since those are the numbers that matter.
+
+Lastly, 3 seeds is low power, so the intervals are descriptive, not corrected for multiple comparisons.
+
+## Resources
+
+The whole study took 5.8 of its 8 hours on both 3090s. The GPT peaked at about 3.1 GB per GPU, so there is a lot of headroom for a longer run.
+
+## Conclusions and Future Improvement
+
+Shape seems to matter a little on CIFAR, it doesn't measurably matter in early language-model training, and exact orthogonalization isn't worth its cost. The next version:
+
+- Widen the learning-rate grid (at least 0.0025 to 0.16)
+- Train the GPT 10–50× longer
+- Sweep γ on the language model directly, instead of inheriting the CIFAR winner
+- Rescale before iterating so fewer singular values fall below σ_min, then check whether shape starts to matter
+
+Code, the audit, and every number above: [github.com/michael951021/muon-schulz-analysis](https://github.com/michael951021/muon-schulz-analysis).
