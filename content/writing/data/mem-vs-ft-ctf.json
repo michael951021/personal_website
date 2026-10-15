@@ -1,0 +1,177 @@
+{
+  "source": "github.com/michael951021/mem-vs-ft-ctf, results/summary.json and results/summary_h3.json",
+  "pilot27b": {
+    "n_attempts": 180,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "turns_saved": {
+      "B|test-indist": {
+        "mean": 1.0,
+        "ci95": [
+          0.2,
+          1.8
+        ],
+        "n": 15
+      },
+      "B|test-transfer": {
+        "mean": 0.0,
+        "ci95": [
+          -0.6,
+          0.6
+        ],
+        "n": 15
+      },
+      "C|test-indist": {
+        "mean": 1.0,
+        "ci95": [
+          0.2,
+          1.8
+        ],
+        "n": 15
+      },
+      "C|test-transfer": {
+        "mean": 0.4,
+        "ci95": [
+          0.0,
+          0.8
+        ],
+        "n": 15
+      },
+      "D|test-indist": {
+        "mean": 0.4,
+        "ci95": [
+          0.0,
+          1.2
+        ],
+        "n": 15
+      },
+      "D|test-transfer": {
+        "mean": 0.267,
+        "ci95": [
+          -0.333,
+          0.8
+        ],
+        "n": 15
+      }
+    }
+  },
+  "h3": {
+    "n_attempts": 140,
+    "seeds": [
+      0,
+      1
+    ],
+    "success": {
+      "A|train": {
+        "rate": 0.3,
+        "n": 10
+      },
+      "A|test-indist": {
+        "rate": 0.4,
+        "n": 10
+      },
+      "A|test-transfer": {
+        "rate": 0.6,
+        "n": 10
+      },
+      "B|train": {
+        "rate": 0.3,
+        "n": 10
+      },
+      "B|test-indist": {
+        "rate": 0.3,
+        "n": 10
+      },
+      "B|test-transfer": {
+        "rate": 0.5,
+        "n": 10
+      },
+      "C|train": {
+        "rate": 0.2,
+        "n": 10
+      },
+      "C|test-indist": {
+        "rate": 0.5,
+        "n": 10
+      },
+      "C|test-transfer": {
+        "rate": 0.3,
+        "n": 10
+      },
+      "D|train": {
+        "rate": 0.4,
+        "n": 10
+      },
+      "D|test-indist": {
+        "rate": 0.5,
+        "n": 10
+      },
+      "D|test-transfer": {
+        "rate": 0.6,
+        "n": 10
+      },
+      "E|test-indist": {
+        "rate": 0.8,
+        "n": 5
+      },
+      "E|test-transfer": {
+        "rate": 0.6,
+        "n": 5
+      },
+      "F|test-indist": {
+        "rate": 0.6,
+        "n": 5
+      },
+      "F|test-transfer": {
+        "rate": 0.6,
+        "n": 5
+      }
+    },
+    "advantage": {
+      "B": {
+        "mean": -0.1,
+        "ci95": [
+          -0.4,
+          0.2
+        ],
+        "n": 10
+      },
+      "C": {
+        "mean": 0.1,
+        "ci95": [
+          -0.4,
+          0.6
+        ],
+        "n": 10
+      },
+      "D": {
+        "mean": 0.1,
+        "ci95": [
+          0.0,
+          0.3
+        ],
+        "n": 10
+      },
+      "E": {
+        "mean": 0.4,
+        "ci95": [
+          0.0,
+          0.8
+        ],
+        "n": 5
+      },
+      "F": {
+        "mean": 0.2,
+        "ci95": [
+          -0.4,
+          0.8
+        ],
+        "n": 5
+      }
+    },
+    "e_gpu_hours": 0.4375
+  }
+}
