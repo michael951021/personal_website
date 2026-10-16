@@ -22,19 +22,19 @@ One ReAct agent (think, run a shell command, read the output, repeat) is frozen,
 
 The challenges are 12 small, self-contained puzzles across 5 families (encodings, classic ciphers, XOR, forensics, reversing), all local with synthetic flags. Each family has a "sibling" set: same trick, different surface (base64 → base32, Caesar → Atbash), which is the real test of whether a lesson transfers. Flags are redacted from every memory and from the training data, and the training data is decontaminated against the test challenges.
 
-## First Run, Too Easy (obviously)
+## First Run: Too Easy
 
-I started on the 27B model I already had loaded, and it solved... everything. Every arm, every seed, every challenge, in about 4 turns. Success can't go up from 100%, so the only thing left to measure is how *fast* each arm solves:
+I started on the 27B model I already had loaded, and it solved everything. Every arm, every seed, every challenge, in about 4 turns. Success can't go up from 100%, so the only thing left to measure is how *fast* each arm solves:
 
 <MemRegimes />
 
-And the result was the opposite of what I expected! Raw examples (B) and episodic retrieval (C) each save a full turn on same-family challenges (CI [+0.20, +1.80]), while my playbook (D) saves only +0.40, and its interval touches zero. Flip to the sibling families and almost everything washes out.
+The result was the opposite of what I expected. Raw examples (B) and episodic retrieval (C) each save a full turn on same-family challenges (CI [+0.20, +1.80]), while my playbook (D) saves only +0.40, and its interval touches zero. Flip to the sibling families and almost everything washes out.
 
 My best guess at why: the heuristic reflector writes notes like this real one from the playbook:
 
 > "For crypto/encoding: identify the encoding and decode it. Typical tool path: read -> shell -> submit."
 
-Which is... true, but not super helpful. A raw example hands the agent the exact command that worked. A concrete recipe beats an abstract lesson, at least for a model this strong.
+That's true, but not very actionable. A raw example hands the agent the exact command that worked. A concrete recipe beats an abstract lesson, at least for a model this strong.
 
 ## Second Run, a Model That Fails
 
@@ -46,7 +46,7 @@ The baseline solves 40% of same-family challenges. Fine-tuned weights (E) hit **
 
 **And E's 80% needs a few asterisks:**
 
-- E and F got 20 turns and longer outputs per step, while A–D got 15 (the serve jobs weren't equalized, my bad)
+- E and F got 20 turns and longer outputs per step, while A–D got 15 (the serve jobs weren't equalized)
 - E's training data came from a single source challenge, 64 examples total
 - E and F have one seed, A–D have two
 
@@ -54,13 +54,13 @@ So the honest headline is: **at this scale, memory and weights aren't distinguis
 
 ## Things That Went Wrong
 
-The fine-tuned model was trained, then evaluated... with a 404 on every single request. The model server read the relative path to the adapter as a registry URL, the eval script treated the failures as "best-effort," and the job happily reported success. That one stung, and it's why every long job in my loop now has to name the files it's supposed to produce and fails if they aren't there.
+The fine-tuned model was trained, then evaluated, and every request returned a 404. The model server read the relative path to the adapter as a registry URL, the eval script treated the failures as "best-effort," and the job reported success anyway. That's why every long job in my loop now has to name the files it's supposed to produce and fails if they aren't there.
 
 The other lesson was retries. The 7B job got retried about 8 times while I fixed memory limits and exit codes, and the analysis pooled all of them, so some arms looked like they had 8 copies of each seed. Those runs are now kept aside (with a README saying why) and only the last complete set counts.
 
 ## Conclusions and Future Improvement
 
-A negative result for the arm I built, but a pretty clear pointer to the next experiment:
+A negative result for the arm I built, but a clear pointer to the next experiment:
 
 - An LLM reflector that writes concrete command recipes instead of abstract bullets
 - Equalize the turn budget and run E/F on more seeds
