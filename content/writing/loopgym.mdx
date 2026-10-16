@@ -1,0 +1,66 @@
+---
+title: "loopgym: RL on Bugs My Agents Shipped"
+date: "2026-10-16"
+summary: GRPO post-training of a small coding model on Exercism and on bugs my own coding agents shipped, plus the training stack to run it on two 3090s. Most of each batch turned out to carry no learning signal.
+tags: [RL, Training, Agents, Kernels]
+---
+
+Hi! The goal of this project was to see whether RL post-training (GRPO) can teach a small coding model to fix the kind of bugs my own agents ship, and to build the training stack for it myself, from the log-prob kernel up to running it on two 3090s.
+
+## The Tasks
+
+There are two task sources, and both are graded the same way: the model's solution goes into a fresh directory with the original hidden tests, and the reward is 1 only if every test passes.
+
+- **Exercism Python**: 137 exercises with hidden tests (5 more were dropped because their reference solutions don't pass).
+- **loopgym v0**: bugs mined from my agent loop's own repos. I took 141 fix commits, and a candidate only became a task if its hidden test **fails 3/3 runs before the fix and passes 3/3 after**. That left 26 tasks.
+
+Before training on anything real, the trainer had to pass known-answer checks: gold solutions score 1, a planted reward ("say banana") gets learned from 15% to 100%, and a coin-flip reward shows no trend. If those fail, nothing after them means anything.
+
+## 1. Most of the Batch Teaches Nothing
+
+GRPO samples 8 solutions to the same task and pushes the model toward the ones that did better than the group average. That only works if the group disagrees. If all 8 pass, or all 8 fail, every advantage is zero and the group contributes nothing to the gradient.
+
+<LoopgymTraining />
+
+That happened a lot. Across the 1.5B run, **69% of groups had no signal at all** (flip the chart to "Groups with no signal"), and the 0.5B CPU run was about the same at 68%. Training reward went from 0.175 over the first 20 steps to 0.263 over the last 20, though a line fit across all 100 steps gives a slope of +0.0008 per step with a CI that includes zero, with KL to the base model staying tiny the whole time. So the model moved, but slowly, and most of each 7-minute step was spent generating and grading samples that couldn't teach it anything.
+
+## 2. Did It Get Better?
+
+The real test is held-out tasks, scored the same way as the base model (16 samples per task at temperature 0.8):
+
+<LoopgymPassAt1 />
+
+On Exercism the 1.5B model went from **0.306 to 0.354** after 100 steps. That looks like a gain, but there are only 9 held-out tasks, so the question is whether it holds up per task. Pairing the two models task by task and bootstrapping over tasks gives a difference of +0.049 with a 95% CI of [0.000, 0.104]. The lower end sits right at zero, so I count it as a null result, not an improvement: it points the right way, but this eval can't tell it apart from noise. The 0.5B run on CPU showed nothing at all: +0.035 [−0.063, +0.125]. I also regenerated 20 of the 1.5B model's completions to check that grading is deterministic (all 20 rewards matched) and screened them for signs of gaming the grader, like referencing the hidden tests' names. None were flagged.
+
+On the real agent bugs it's simple: **neither base model fixes any of the 13 held-out bugs** (0 of 52 attempts each), and GRPO doesn't change that. These are real fixes in real repos (12 code, 6 config, 8 docs), and the median gap between the buggy and fixed commit is 815 lines of diff, so it's not surprising a 1.5B model can't do them. But it does mean loopgym v0 is an eval for now, not something a model this size can learn from.
+
+## 3. Fitting It on Two 3090s
+
+The setup is vLLM generating on one GPU and the trainer on the other. The trainer needs the log-prob of every generated token, and the obvious way to get it, building the full logits and taking a softmax, gets expensive with Qwen's 152k-token vocabulary:
+
+<LoopgymKernel />
+
+Both alternatives walk the vocabulary in slices and keep a running log-sum-exp, so the full logits never exist. The chunked PyTorch version still holds one slice for every token at once, and the fused C++ kernel goes one token at a time. Every version matches a float64 reference to within 1e-4. The training run used the Triton version of the same kernel on the GPU.
+
+Before training, a gate checks that the two engines agree: vLLM's log-probs and the trainer's, on the same tokens, differ by **0.00016 nats** on average (the gate is 0.02), so vLLM's samples can be trained on directly. Getting the 100-step run to finish after that took six fixes, each a commit (most with a test):
+
+- **Kernels ran on the wrong GPU.** Triton launches on the *current* device, and the trainer's tensors were on the other card. They now launch on the tensors' device, with a two-GPU test.
+- **The trainer ran out of memory.** The model alone is 6 GB in fp32, and the saved activations for a single 2,000-token sequence filled the rest of the card by step 7. Gradient checkpointing recomputes them in the backward pass instead (with a test that the gradients are identical).
+- **Resuming put the model on the CPU.** The 12-hour job limit cut the run at step 90, and the restart rebuilt the model without moving it back to its GPU. The first forward pass then landed on vLLM's card and crashed.
+- Plus three vLLM setup issues: a LoRA kernel that rejects fp32, a sampler that failed to compile, and a prompt format mismatch.
+
+## What Didn't Work
+
+- **The learning signal.** With most groups unanimous, 100 steps of 32 samples is a lot of compute for little gradient. That's the main thing I'd change.
+- **loopgym tasks are too hard for 1.5B**, so the mined bugs can't train anything yet.
+- **The scaling study never ran.** Two-node FSDP/DeepSpeed and a capped AWS run are written and tested offline, but they need GPU time I haven't given them.
+
+## Future Improvement
+
+- Filter or re-weight tasks so groups have mixed outcomes (drop tasks the model always or never solves), and try larger groups
+- A bigger model on loopgym, or smaller, single-file bugs mined from the same repos
+- Run the two-node and AWS scaling study
+
+## Code
+
+Code, the report, and every number above (recomputed from `results/` by a script): [github.com/michael951021/loopgym](https://github.com/michael951021/loopgym).
