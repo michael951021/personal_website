@@ -78,7 +78,7 @@ export function LoopgymPassAt1() {
   return (
     <Figure caption={<>{split === 'val'
       ? 'Exercism validation tasks (9 exercises, hidden tests). pass@1 at temperature 0.8, 512 new tokens.'
-      : 'loopgym tasks: 13 held-out bugs that agents actually shipped, each verified to fail before the fix and pass after.'} Dot: pass@1. Line: 95% bootstrap interval over tasks. Hover a row for the sample count.</>} controls={<>
+      : 'LoopGYM tasks: 13 held-out bugs that agents actually shipped, each verified to fail before the fix and pass after.'} Dot: pass@1. Line: 95% bootstrap interval over tasks. Hover a row for the sample count.</>} controls={<>
         <Toggle active={split === 'val'} onClick={() => setSplit('val')}>Exercism</Toggle>
         <Toggle active={split === 'loopgym'} onClick={() => setSplit('loopgym')}>Real agent bugs</Toggle>
       </>}>
